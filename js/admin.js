@@ -182,6 +182,14 @@ function initAuth() {
   const authInput = document.getElementById('authPinInput');
   const authError = document.getElementById('authError');
   const logoutBtn = document.getElementById('sidebarLogoutBtn');
+  const openForgotPinBtn = document.getElementById('openForgotPinBtn');
+  const forgotPinModal = document.getElementById('forgotPinModalOverlay');
+  const closeForgotPinBtn = document.getElementById('closeForgotPinModal');
+  const cancelRecoveryBtn = document.getElementById('cancelRecoveryBtn');
+  const recoveryForm = document.getElementById('recoveryPinForm');
+  const recoveryInput = document.getElementById('recoveryEmailInput');
+  const newPinInput = document.getElementById('newRecoveryPinInput');
+  const recoveryErrorMsg = document.getElementById('recoveryErrorMsg');
 
   const getSavedPin = () => localStorage.getItem('muneeba_admin_pin') || 'admin123';
 
@@ -202,6 +210,46 @@ function initAuth() {
       authInput.focus();
     }
   });
+
+  // Forgot PIN Recovery Modal
+  if (openForgotPinBtn && forgotPinModal) {
+    openForgotPinBtn.addEventListener('click', () => {
+      forgotPinModal.classList.add('open');
+      if (recoveryErrorMsg) recoveryErrorMsg.style.display = 'none';
+      if (recoveryForm) recoveryForm.reset();
+    });
+  }
+
+  const closeRecoveryModal = () => {
+    if (forgotPinModal) forgotPinModal.classList.remove('open');
+  };
+
+  if (closeForgotPinBtn) closeForgotPinBtn.addEventListener('click', closeRecoveryModal);
+  if (cancelRecoveryBtn) cancelRecoveryBtn.addEventListener('click', closeRecoveryModal);
+
+  if (recoveryForm) {
+    recoveryForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const enteredKey = recoveryInput.value.trim().toLowerCase();
+      const newPin = newPinInput.value.trim();
+
+      // Master Verification: admin email or master security code
+      if (enteredKey === 'muneebaj013@gmail.com' || enteredKey === 'muneeba2026') {
+        if (newPin.length < 4) {
+          showToast('New PIN must be at least 4 digits!', 'error');
+          return;
+        }
+
+        localStorage.setItem('muneeba_admin_pin', newPin);
+        sessionStorage.setItem('muneeba_admin_session', 'active');
+        closeRecoveryModal();
+        authWrapper.classList.add('hidden');
+        showToast('PIN successfully reset! Logged in.', 'success');
+      } else {
+        if (recoveryErrorMsg) recoveryErrorMsg.style.display = 'block';
+      }
+    });
+  }
 
   if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
@@ -338,15 +386,22 @@ function renderOverviewStats() {
   const totalInquiries = document.getElementById('statTotalInquiries');
   const totalTestimonials = document.getElementById('statTotalTestimonials');
   const unreadBadge = document.getElementById('inquiriesBadge');
+  const pendingRevBadge = document.getElementById('pendingReviewsBadge');
 
   if (totalProjects) totalProjects.textContent = currentProjects.length;
-  if (totalTestimonials) totalTestimonials.textContent = currentTestimonials.length;
+  if (totalTestimonials) totalTestimonials.textContent = currentTestimonials.filter(t => t.status !== 'pending').length;
   if (totalInquiries) totalInquiries.textContent = currentInquiries.length;
 
   const unreadCount = currentInquiries.filter(i => i.status === 'new').length;
   if (unreadBadge) {
     unreadBadge.textContent = unreadCount;
     unreadBadge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+  }
+
+  const pendingCount = currentTestimonials.filter(t => t.status === 'pending').length;
+  if (pendingRevBadge) {
+    pendingRevBadge.textContent = pendingCount;
+    pendingRevBadge.style.display = pendingCount > 0 ? 'inline-block' : 'none';
   }
 
   // Render recent inquiries on overview
@@ -402,32 +457,78 @@ function renderProjectsTable(filterCategory = 'all', searchQuery = '') {
   `).join('') || '<tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted);">No projects found. Click "Add New Project" to create one!</td></tr>';
 }
 
-function renderTestimonialsTable() {
+function renderTestimonialsTable(statusFilter = 'all', searchQuery = '') {
   const tbody = document.getElementById('testimonialsTableBody');
   if (!tbody) return;
 
-  tbody.innerHTML = currentTestimonials.map(t => `
-    <tr>
-      <td>
-        <div class="admin-avatar" style="background:linear-gradient(135deg, var(--highlight), #B8860B); color:#070D1E; font-weight:800;">${escapeHtml(t.initials || 'CL')}</div>
-      </td>
-      <td><strong>${escapeHtml(t.name)}</strong></td>
-      <td>${escapeHtml(t.role)}</td>
-      <td style="color:var(--highlight); letter-spacing:2px;">${'★'.repeat(t.rating || 5)}</td>
-      <td><small style="color:var(--text-muted);">${escapeHtml(t.quote.substring(0, 80))}...</small></td>
-      <td>
-        <div class="table-actions">
-          <button type="button" class="btn-table-action" onclick="openEditTestimonialModal('${t.id}')" title="Edit Testimonial">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-          </button>
-          <button type="button" class="btn-table-action delete" onclick="deleteTestimonial('${t.id}')" title="Delete Testimonial">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-          </button>
-        </div>
-      </td>
-    </tr>
-  `).join('') || '<tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted);">No testimonials found.</td></tr>';
+  let filtered = currentTestimonials;
+  if (statusFilter === 'approved') {
+    filtered = filtered.filter(t => t.status !== 'pending');
+  } else if (statusFilter === 'pending') {
+    filtered = filtered.filter(t => t.status === 'pending');
+  }
+
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    filtered = filtered.filter(t => t.name.toLowerCase().includes(q) || t.quote.toLowerCase().includes(q) || t.role.toLowerCase().includes(q));
+  }
+
+  tbody.innerHTML = filtered.map(t => {
+    const isPending = t.status === 'pending';
+    return `
+      <tr style="${isPending ? 'background: rgba(245, 158, 11, 0.06);' : ''}">
+        <td>
+          <div class="admin-avatar" style="background:linear-gradient(135deg, var(--highlight), #B8860B); color:#070D1E; font-weight:800;">${escapeHtml(t.initials || 'CL')}</div>
+        </td>
+        <td><strong>${escapeHtml(t.name)}</strong></td>
+        <td>${escapeHtml(t.role)}</td>
+        <td style="color:var(--highlight); letter-spacing:2px;">${'★'.repeat(t.rating || 5)}</td>
+        <td><small style="color:var(--text-muted);">${escapeHtml(t.quote.substring(0, 80))}...</small></td>
+        <td>
+          ${isPending 
+            ? `<span class="badge-tag" style="background:rgba(245,158,11,0.15); color:var(--warning); border-color:var(--warning);">PENDING APPROVAL</span>`
+            : `<span class="badge-tag green">LIVE / APPROVED</span>`
+          }
+        </td>
+        <td>
+          <div class="table-actions">
+            ${isPending ? `
+              <button type="button" class="btn-table-action" onclick="approveTestimonial('${t.id}')" title="Approve & Publish Live" style="color:var(--success); border-color:rgba(52,211,153,0.4); background:rgba(52,211,153,0.15);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </button>
+            ` : ''}
+            <button type="button" class="btn-table-action" onclick="openEditTestimonialModal('${t.id}')" title="Edit Testimonial">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            </button>
+            <button type="button" class="btn-table-action delete" onclick="deleteTestimonial('${t.id}')" title="${isPending ? 'Reject & Delete Review' : 'Delete Testimonial'}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('') || '<tr><td colspan="7" style="text-align:center; padding:2rem; color:var(--text-muted);">No testimonials or reviews found.</td></tr>';
 }
+
+window.approveTestimonial = async function(id) {
+  const t = currentTestimonials.find(item => item.id === id);
+  if (!t) return;
+
+  t.status = 'approved';
+  localStorage.setItem('muneeba_testimonials', JSON.stringify(currentTestimonials));
+
+  if (supabaseClient) {
+    try {
+      await supabaseClient.from('testimonials').update({ status: 'approved' }).eq('id', id);
+    } catch (err) {
+      console.warn('Supabase approve error:', err);
+    }
+  }
+
+  renderTestimonialsTable();
+  renderOverviewStats();
+  showToast(`Review by ${t.name} approved & published live!`, 'success');
+};
 
 function renderInquiriesTable() {
   const tbody = document.getElementById('inquiriesTableBody');
@@ -707,6 +808,15 @@ function setupEventListeners() {
     const handleFilter = () => renderProjectsTable(projFilter.value, projSearch.value);
     projSearch.addEventListener('input', handleFilter);
     projFilter.addEventListener('change', handleFilter);
+  }
+
+  // Testimonials Review Search & Filter
+  const revSearch = document.getElementById('reviewSearchInput');
+  const revFilter = document.getElementById('reviewStatusFilter');
+  if (revSearch && revFilter) {
+    const handleRevFilter = () => renderTestimonialsTable(revFilter.value, revSearch.value);
+    revSearch.addEventListener('input', handleRevFilter);
+    revFilter.addEventListener('change', handleRevFilter);
   }
 
   // Supabase Settings Form

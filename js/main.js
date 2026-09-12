@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initScrollAnimations();
   initMatrixReferenceShowcase();
   initDynamicContentSync();
+  initClientReviewSubmission();
 });
 
 /* --------------------------------------------------------------------------
@@ -1580,11 +1581,12 @@ async function initDynamicContentSync() {
     }
   }
 
-  // Update Testimonials Grid if dynamic testimonials exist
+  // Update Testimonials Grid if dynamic testimonials exist (Only Live/Approved Reviews)
   if (testimonials && testimonials.length) {
+    const liveTestimonials = testimonials.filter(t => t.status !== 'pending');
     const testGrid = document.querySelector('.testimonials-grid');
-    if (testGrid) {
-      testGrid.innerHTML = testimonials.map(t => `
+    if (testGrid && liveTestimonials.length) {
+      testGrid.innerHTML = liveTestimonials.map(t => `
         <div class="testimonial-card">
           <div>
             <div class="testimonial-rating" aria-label="${t.rating || 5} out of 5 stars">
@@ -1604,6 +1606,89 @@ async function initDynamicContentSync() {
         </div>
       `).join('');
     }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   15. Client Review Submission Handler (Moderation Workflow)
+   -------------------------------------------------------------------------- */
+function initClientReviewSubmission() {
+  const modal = document.getElementById('clientReviewModal');
+  const openBtn = document.getElementById('openReviewModalBtn');
+  const closeBtn = document.getElementById('closeReviewModalBtn');
+  const cancelBtn = document.getElementById('cancelReviewBtn');
+  const form = document.getElementById('publicReviewForm');
+  const successMsg = document.getElementById('reviewSubmitSuccess');
+
+  if (!modal) return;
+
+  const openModal = () => {
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    if (successMsg) successMsg.style.display = 'none';
+  };
+
+  const closeModal = () => {
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  if (openBtn) openBtn.addEventListener('click', openModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('clientRevName').value.trim();
+      const role = document.getElementById('clientRevRole').value.trim();
+      const rating = parseInt(document.getElementById('clientRevRating').value, 10) || 5;
+      const quote = document.getElementById('clientRevQuote').value.trim();
+      const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'CL';
+
+      const newReview = {
+        id: 'rev-' + Date.now(),
+        name,
+        role,
+        initials,
+        rating,
+        quote,
+        status: 'pending', // Pending Admin Moderation
+        date: new Date().toISOString().split('T')[0]
+      };
+
+      // Save to localStorage
+      try {
+        const saved = JSON.parse(localStorage.getItem('muneeba_testimonials') || '[]');
+        saved.unshift(newReview);
+        localStorage.setItem('muneeba_testimonials', JSON.stringify(saved));
+      } catch (err) {
+        console.warn('Local review storage error:', err);
+      }
+
+      // Save to Supabase if connected
+      const supabaseUrl = localStorage.getItem('supabase_url');
+      const supabaseKey = localStorage.getItem('supabase_key');
+      if (supabaseUrl && supabaseKey && window.supabase) {
+        try {
+          const client = window.supabase.createClient(supabaseUrl, supabaseKey);
+          await client.from('testimonials').insert(newReview);
+        } catch (err) {
+          console.warn('Supabase review insert:', err);
+        }
+      }
+
+      if (successMsg) successMsg.style.display = 'block';
+      form.reset();
+
+      setTimeout(() => {
+        closeModal();
+      }, 3000);
+    });
   }
 }
 

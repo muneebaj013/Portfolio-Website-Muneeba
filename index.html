@@ -793,6 +793,11 @@
           <div class="section-label">CLIENT FEEDBACK</div>
           <h2 class="section-heading">What Clients Say</h2>
           <p class="section-subtitle">Real experiences and feedback from business owners and content creators.</p>
+          <div style="margin-top: 1.25rem;">
+            <button type="button" class="btn btn-secondary btn-sm" id="openReviewModalBtn">
+              ✍️ Leave a Review / Share Feedback
+            </button>
+          </div>
         </div>
 
         <div class="testimonials-grid">
@@ -1481,6 +1486,56 @@
           <a href="#contact" class="btn btn-primary btn-sm" id="matrixHireCta">Request This Service &rarr;</a>
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. Client Review Submission Modal -->
+  <div class="modal-overlay" id="clientReviewModal" role="dialog" aria-modal="true" aria-labelledby="clientReviewTitle">
+    <div class="modal-box" style="max-width: 580px;">
+      <button class="modal-close-btn" id="closeReviewModalBtn" aria-label="Close review modal">&times;</button>
+      <div class="modal-header">
+        <span class="modal-tag">Client Feedback</span>
+        <h3 class="modal-title" id="clientReviewTitle">Submit Your Review</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 4px;">
+          Share your experience working with Muneeba Jabbar. Your review will be published upon admin verification.
+        </p>
+      </div>
+      <div class="modal-body">
+        <form id="publicReviewForm">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" for="clientRevName">Your Full Name *</label>
+            <input type="text" class="form-control" id="clientRevName" placeholder="e.g. Emily Miller" required>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" for="clientRevRole">Company, Brand or Role *</label>
+            <input type="text" class="form-control" id="clientRevRole" placeholder="e.g. Founder, Luxe Apparel" required>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" for="clientRevRating">Rating (Stars) *</label>
+            <select class="form-control" id="clientRevRating" required>
+              <option value="5">★★★★★ (5 Stars - Exceptional Quality)</option>
+              <option value="4">★★★★☆ (4 Stars - Very Good)</option>
+              <option value="3">★★★☆☆ (3 Stars - Good)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label" for="clientRevQuote">Your Review / Testimonial *</label>
+            <textarea class="form-control" id="clientRevQuote" rows="4" placeholder="How did Muneeba's work help your brand or content grow?" required></textarea>
+          </div>
+
+          <div id="reviewSubmitSuccess" style="display: none; padding: 0.75rem 1rem; background: rgba(52, 211, 153, 0.15); border: 1px solid var(--success); border-radius: 8px; color: #34D399; font-size: 0.85rem; margin-bottom: 1rem;">
+            ✓ Thank you! Your review has been submitted successfully and is pending admin approval before going live.
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+            <button type="button" class="btn btn-secondary btn-sm" id="cancelReviewBtn">Cancel</button>
+            <button type="submit" class="btn btn-primary btn-sm" id="submitReviewBtn">Submit Review</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>

@@ -44,6 +44,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </button>
         <p class="auth-error" id="authError">Incorrect PIN. Please try again.</p>
+        <button type="button" class="auth-link-btn" id="openForgotPinBtn" style="background:none; border:none; color:var(--accent-cyan); font-size:0.8rem; cursor:pointer; margin-top:0.75rem; text-decoration:underline;">Forgot Security PIN?</button>
       </form>
 
       <div class="auth-hint">
@@ -93,6 +94,7 @@
         <a class="nav-item" data-tab="tabTestimonials">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
           <span>Testimonials</span>
+          <span class="nav-badge" id="pendingReviewsBadge" style="display:none; background:var(--warning); color:#070D1E;">0</span>
         </a>
 
         <a class="nav-item" data-tab="tabInquiries">
@@ -258,7 +260,7 @@
         </div>
 
         <!-- ==================================================================
-             TAB 3: TESTIMONIALS MANAGEMENT
+             TAB 3: TESTIMONIALS MANAGEMENT & CLIENT REVIEW MODERATION
              ================================================================== -->
         <div class="tab-pane" id="tabTestimonials">
           
@@ -270,6 +272,17 @@
           </div>
 
           <div class="data-card">
+            <div class="data-card-header">
+              <div class="search-filter-box">
+                <input type="text" class="admin-search-input" id="reviewSearchInput" placeholder="Search client name or review...">
+                <select class="admin-filter-select" id="reviewStatusFilter">
+                  <option value="all">All Statuses</option>
+                  <option value="approved">Live / Approved</option>
+                  <option value="pending">Pending Approval (New)</option>
+                </select>
+              </div>
+            </div>
+
             <div class="table-responsive">
               <table class="admin-table">
                 <thead>
@@ -279,6 +292,7 @@
                     <th>Company / Role</th>
                     <th>Rating</th>
                     <th>Review Quote</th>
+                    <th>Status</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -588,7 +602,44 @@ create policy "Public modify inquiries" on inquiries for all using (true);</pre>
   </div>
 
   <!-- ======================================================================
-       5. TOAST NOTIFICATION CONTAINER
+       5. FORGOT / RESET PIN MODAL
+       ====================================================================== -->
+  <div class="admin-modal-overlay" id="forgotPinModalOverlay">
+    <div class="admin-modal-box" style="max-width: 460px;">
+      <div class="modal-header-row">
+        <h3 class="modal-title">Reset Admin Security PIN</h3>
+        <button type="button" class="modal-close" id="closeForgotPinModal">&times;</button>
+      </div>
+
+      <form id="recoveryPinForm">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+          Enter your registered admin email (<code style="color:var(--accent-cyan);">muneebaj013@gmail.com</code>) or Master Recovery Key (<code style="color:var(--highlight);">muneeba2026</code>) to set a new PIN.
+        </p>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label">Admin Email or Recovery Key *</label>
+          <input type="text" class="form-control" id="recoveryEmailInput" placeholder="muneebaj013@gmail.com or muneeba2026" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label">New Security PIN (Min 4 digits) *</label>
+          <input type="password" class="form-control" id="newRecoveryPinInput" placeholder="Enter new PIN..." required minlength="4">
+        </div>
+
+        <p id="recoveryErrorMsg" style="display: none; color: var(--danger); font-size: 0.8rem; margin-bottom: 1rem;">
+          Invalid email or recovery key. Please check your credentials.
+        </p>
+
+        <div class="modal-footer-row">
+          <button type="button" class="btn-secondary" id="cancelRecoveryBtn">Cancel</button>
+          <button type="submit" class="btn-action-primary">Reset PIN &amp; Login</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       6. TOAST NOTIFICATION CONTAINER
        ====================================================================== -->
   <div class="toast-container" id="toastContainer"></div>
 
