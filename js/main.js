@@ -1614,7 +1614,7 @@ async function initDynamicContentSync() {
    -------------------------------------------------------------------------- */
 function initClientReviewSubmission() {
   const modal = document.getElementById('clientReviewModal');
-  const openBtn = document.getElementById('openReviewModalBtn');
+  const openBtns = document.querySelectorAll('#openReviewModalBtn, .open-review-modal-btn');
   const closeBtn = document.getElementById('closeReviewModalBtn');
   const cancelBtn = document.getElementById('cancelReviewBtn');
   const form = document.getElementById('publicReviewForm');
@@ -1633,7 +1633,7 @@ function initClientReviewSubmission() {
     document.body.style.overflow = '';
   };
 
-  if (openBtn) openBtn.addEventListener('click', openModal);
+  openBtns.forEach(btn => btn.addEventListener('click', openModal));
   if (closeBtn) closeBtn.addEventListener('click', closeModal);
   if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
 
