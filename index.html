@@ -204,26 +204,41 @@
                   </div>
 
                   <div class="chart-bars-row">
-                    <div class="chart-bar-col highlighted">
-                      <div class="chart-bar-pillar" style="height: 92%;"></div>
+                    <div class="chart-bar-col highlighted" data-matrix-tab="ai-video" role="button" tabindex="0" title="Click to view AI Video references">
+                      <div class="chart-bar-pillar" style="height: 92%;">
+                        <span class="chart-bar-pct">92%</span>
+                      </div>
                       <span class="chart-bar-label">AI Video</span>
                     </div>
-                    <div class="chart-bar-col">
-                      <div class="chart-bar-pillar" style="height: 85%;"></div>
+                    <div class="chart-bar-col" data-matrix-tab="editing" role="button" tabindex="0" title="Click to view Video Editing references">
+                      <div class="chart-bar-pillar" style="height: 85%;">
+                        <span class="chart-bar-pct">85%</span>
+                      </div>
                       <span class="chart-bar-label">Editing</span>
                     </div>
-                    <div class="chart-bar-col">
-                      <div class="chart-bar-pillar" style="height: 78%;"></div>
+                    <div class="chart-bar-col" data-matrix-tab="shopify" role="button" tabindex="0" title="Click to view Shopify references">
+                      <div class="chart-bar-pillar" style="height: 78%;">
+                        <span class="chart-bar-pct">78%</span>
+                      </div>
                       <span class="chart-bar-label">Shopify</span>
                     </div>
-                    <div class="chart-bar-col">
-                      <div class="chart-bar-pillar" style="height: 88%;"></div>
+                    <div class="chart-bar-col" data-matrix-tab="meta-ads" role="button" tabindex="0" title="Click to view Meta Ads references">
+                      <div class="chart-bar-pillar" style="height: 88%;">
+                        <span class="chart-bar-pct">88%</span>
+                      </div>
                       <span class="chart-bar-label">Meta Ads</span>
                     </div>
-                    <div class="chart-bar-col">
-                      <div class="chart-bar-pillar" style="height: 80%;"></div>
+                    <div class="chart-bar-col" data-matrix-tab="seo" role="button" tabindex="0" title="Click to view SEO references">
+                      <div class="chart-bar-pillar" style="height: 80%;">
+                        <span class="chart-bar-pct">80%</span>
+                      </div>
                       <span class="chart-bar-label">SEO</span>
                     </div>
+                  </div>
+
+                  <div class="matrix-chart-hint" id="matrixChartHint" role="button" tabindex="0">
+                    <span class="matrix-hint-pulse"></span>
+                    <span>Click any bar to preview reference videos &amp; sample work</span>
                   </div>
                 </div>
 
@@ -1409,6 +1424,60 @@
         <p style="margin-bottom: 1rem;">All content, video edits, animation reels, and project showcases presented on this site are the intellectual property of Muneeba Jabbar unless otherwise stated.</p>
         <h4 style="color: #FFFFFF; margin-top: 1rem; margin-bottom: 0.5rem;">Service Engagement</h4>
         <p>Specific project deliverables, milestones, and contractual terms are formalized via custom client agreements prior to project commencement.</p>
+      </div>
+  <!-- 8. Matrix Reference Video & Case Study Showcase Modal -->
+  <div class="modal-overlay" id="matrixReferenceModal" role="dialog" aria-modal="true" aria-labelledby="modalMatrixTitle">
+    <div class="modal-box matrix-modal-box">
+      <button class="modal-close-btn" id="closeMatrixModal" aria-label="Close reference modal">&times;</button>
+      
+      <div class="modal-header matrix-modal-header">
+        <div class="matrix-header-top">
+          <span class="modal-tag" id="modalMatrixTag">Reference Work Showcase</span>
+          <span class="matrix-live-pill"><span class="matrix-live-dot"></span> Interactive Video Proof</span>
+        </div>
+        <h3 class="modal-title" id="modalMatrixTitle">AI Video &amp; Animation Showcase</h3>
+        <p class="matrix-modal-subtitle" id="modalMatrixSubtitle">
+          Explore sample client deliverables, motion benchmarks, and real campaign results.
+        </p>
+
+        <!-- Category Switcher Tabs -->
+        <div class="matrix-tabs-nav" role="tablist" aria-label="Category Switcher">
+          <button type="button" class="matrix-tab-btn active" data-tab="ai-video" role="tab" aria-selected="true">
+            <span class="matrix-tab-icon">🎬</span> AI Video
+          </button>
+          <button type="button" class="matrix-tab-btn" data-tab="editing" role="tab" aria-selected="false">
+            <span class="matrix-tab-icon">✂️</span> Video Editing
+          </button>
+          <button type="button" class="matrix-tab-btn" data-tab="shopify" role="tab" aria-selected="false">
+            <span class="matrix-tab-icon">🛍️</span> Shopify CRO
+          </button>
+          <button type="button" class="matrix-tab-btn" data-tab="meta-ads" role="tab" aria-selected="false">
+            <span class="matrix-tab-icon">📈</span> Meta Ads
+          </button>
+          <button type="button" class="matrix-tab-btn" data-tab="seo" role="tab" aria-selected="false">
+            <span class="matrix-tab-icon">🚀</span> SEO Growth
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-body matrix-modal-body">
+        
+        <!-- Reference Videos & Media Grid -->
+        <div class="matrix-reference-grid" id="matrixReferenceGrid">
+          <!-- Dynamic Video/Media cards injected via JavaScript -->
+        </div>
+
+        <!-- Strategy & Deliverables Box -->
+        <div class="matrix-strategy-box" id="matrixStrategyBox">
+          <!-- Strategy & tech stack details injected via JavaScript -->
+        </div>
+
+        <!-- Modal Footer Actions -->
+        <div class="matrix-modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" id="closeMatrixModalBtn">Close Preview</button>
+          <a href="#contact" class="btn btn-primary btn-sm" id="matrixHireCta">Request This Service &rarr;</a>
+        </div>
+
       </div>
     </div>
   </div>

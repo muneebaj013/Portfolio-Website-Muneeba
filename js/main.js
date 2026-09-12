@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initContactForm();
   initLegalModals();
   initScrollAnimations();
+  initMatrixReferenceShowcase();
 });
 
 /* --------------------------------------------------------------------------
@@ -1032,4 +1033,499 @@ function initScrollAnimations() {
   }, { threshold: 0.1 });
 
   animatedElements.forEach(el => observer.observe(el));
+}
+
+/* --------------------------------------------------------------------------
+   13. Performance Matrix & Reference Work Video Showcase
+   -------------------------------------------------------------------------- */
+function initMatrixReferenceShowcase() {
+  const modal = document.getElementById('matrixReferenceModal');
+  const closeBtn = document.getElementById('closeMatrixModal');
+  const closeFooterBtn = document.getElementById('closeMatrixModalBtn');
+  const hireCta = document.getElementById('matrixHireCta');
+  const chartBars = document.querySelectorAll('[data-matrix-tab]');
+  const hintBtn = document.getElementById('matrixChartHint');
+  const tabsNav = document.querySelectorAll('.matrix-tab-btn');
+  const gridContainer = document.getElementById('matrixReferenceGrid');
+  const strategyContainer = document.getElementById('matrixStrategyBox');
+  const modalTag = document.getElementById('modalMatrixTag');
+  const modalTitle = document.getElementById('modalMatrixTitle');
+  const modalSubtitle = document.getElementById('modalMatrixSubtitle');
+
+  if (!modal || !chartBars.length) return;
+
+  const matrixData = {
+    'ai-video': {
+      tag: 'AI Animation & Motion Benchmark',
+      title: 'AI Video & High-Impact Visual Effects Showcase',
+      subtitle: 'Photorealistic AI generation, dynamic camera choreography, and cinematic commercials.',
+      serviceValue: 'video-editing',
+      videos: [
+        {
+          id: 'ai-v1',
+          badge: 'Runway Gen-3 • 4K 60FPS',
+          duration: '0:48',
+          title: 'Cyberpunk Futuristic Brand Reveal Commercial',
+          desc: 'End-to-end AI-generated luxury commercial featuring neural frame interpolation, 4K texture upscaling, and custom sound design.',
+          kpis: ['84.6% Video Retention', '4K 60FPS Render', '120K+ Views'],
+          canvasType: 'ai_cyberpunk',
+          accentColor: '#38BDF8'
+        },
+        {
+          id: 'ai-v2',
+          badge: 'Midjourney v6 • Runway Motion',
+          duration: '0:35',
+          title: 'AI Character Consistency & Cinematic Storytelling',
+          desc: 'Multi-scene character narrative with consistent lighting, dynamic depth-of-field movement, and voice-synced audio mastering.',
+          kpis: ['+92% Watch Completion', 'Multi-Scene Pipeline', 'Viral Reel Format'],
+          canvasType: 'ai_neural',
+          accentColor: '#D4AF37'
+        }
+      ],
+      deliverables: [
+        'Custom Prompt Engineering & Character Seed Consistency',
+        'Runway Gen-3 & Midjourney v6 Frame-by-Frame Generation',
+        'After Effects Motion Tracking & Particle Compositing',
+        'Topaz Video AI 4K 60FPS Neural Upscaling & Color Grading'
+      ],
+      tools: ['Runway Gen-3 Alpha', 'Midjourney v6', 'Adobe After Effects', 'Topaz Video AI', 'ElevenLabs', 'Premiere Pro']
+    },
+    'editing': {
+      tag: 'Retention Video Editing Proof',
+      title: 'High-Retention Short-Form & UGC Video Showcase',
+      subtitle: 'Hook-optimized pacing, kinetic typography, and conversion-focused social media reels.',
+      serviceValue: 'video-editing',
+      videos: [
+        {
+          id: 'edit-v1',
+          badge: 'Alex Hormozi / Ali Abdaal Style',
+          duration: '0:58',
+          title: 'Viral Talking-Head Educational Reel Breakdown',
+          desc: 'High-energy hook in the first 2.5s, animated kinetic captions, sound FX punches, B-roll overlays, and zoom dynamics.',
+          kpis: ['4.8s Avg Hook Retention', '2.4M Combined Views', '+180% Engagement'],
+          canvasType: 'waveform_pulse',
+          accentColor: '#60A5FA'
+        },
+        {
+          id: 'edit-v2',
+          badge: 'Direct Response UGC Reel',
+          duration: '0:42',
+          title: 'E-Commerce Product Performance UGC Ad',
+          desc: 'Pacing engineered specifically for TikTok and Meta Reels algorithm to stop scrolling and maximize click-through rate.',
+          kpis: ['8.6x ROAS Impact', '4.2% CTR', 'High Conversion CTA'],
+          canvasType: 'ugc_glitch',
+          accentColor: '#34D399'
+        }
+      ],
+      deliverables: [
+        'Aggressive Pattern Interrupts & First 3-Second Hook Architecture',
+        'Custom Animated Typography & Sound FX Design (Whooshes, Risers)',
+        'Professional Lumetri Color Grading & Skin Tone Matching',
+        'Aspect Ratio Multi-Formatting (9:16 Reels, 16:9 YouTube, 1:1 Feed)'
+      ],
+      tools: ['Adobe Premiere Pro', 'Adobe After Effects', 'CapCut Pro', 'Audition', 'DaVinci Resolve']
+    },
+    'shopify': {
+      tag: 'Shopify CRO & E-Commerce Audit',
+      title: 'High-Converting Shopify Store Design & CRO Walkthrough',
+      subtitle: 'Mobile-first user experience, sub-second speed optimization, and average order value boosters.',
+      serviceValue: 'shopify-design',
+      videos: [
+        {
+          id: 'shop-v1',
+          badge: 'Shopify Plus • Liquid Custom',
+          duration: '1:12',
+          title: 'Luxury Fashion Brand Store Redesign & Funnel Audit',
+          desc: 'Complete frontend overhaul with sticky add-to-cart, 1-click bundle upsells, dynamic currency selector, and zero layout shift.',
+          kpis: ['+42% Conversion Rate', '1.2s Load Speed', '+65% Mobile AOV'],
+          canvasType: 'ecommerce_funnel',
+          accentColor: '#D4AF37'
+        },
+        {
+          id: 'shop-v2',
+          badge: 'PageFly & Custom CSS',
+          duration: '0:50',
+          title: 'Interactive 3D Product Page & Trust Architecture',
+          desc: 'High-trust landing page featuring verified customer proof, live inventory counter, and streamlined mobile checkout flow.',
+          kpis: ['98 Mobile PageSpeed', '28.4% Add-to-Cart Rate', 'Zero Abandonment'],
+          canvasType: 'speed_matrix',
+          accentColor: '#38BDF8'
+        }
+      ],
+      deliverables: [
+        'Full Shopify Theme Customization & Liquid Code Tuning',
+        'Conversion Rate Optimization (CRO) Funnel & Checkout Streamlining',
+        'Mobile-First Responsive Layout & Speed Optimization (< 1.5s)',
+        'Klaviyo Email Flow Integration & Post-Purchase Upsells'
+      ],
+      tools: ['Shopify Plus', 'Liquid / CSS3', 'PageFly / Shogun', 'Google Tag Manager', 'Klaviyo', 'Hotjar']
+    },
+    'meta-ads': {
+      tag: 'Paid Advertising Case Study',
+      title: 'Meta & Google Ads Scaling & Creative Optimization',
+      subtitle: 'Data-driven paid advertising architectures generating sustainable high ROAS and scalable revenue.',
+      serviceValue: 'meta-ads',
+      videos: [
+        {
+          id: 'ads-v1',
+          badge: 'Meta Ads Manager • A/B Creative',
+          duration: '1:05',
+          title: 'Scaling E-Commerce Brand to $50k/Mo with 8.6x ROAS',
+          desc: 'Creative testing framework isolating hooks, bodies, and CTAs across lookalike and broad audiences for maximum scaling stability.',
+          kpis: ['8.6x Average ROAS', '$0.42 Cost Per Click', '+320% Revenue'],
+          canvasType: 'ads_growth',
+          accentColor: '#38BDF8'
+        },
+        {
+          id: 'ads-v2',
+          badge: 'Google Ads & Meta CAPI',
+          duration: '0:45',
+          title: 'Omnichannel Retargeting & High-Intent Search Funnel',
+          desc: 'Conversions API setup paired with Google Performance Max campaigns to capture high-intent bottom-of-funnel buyers.',
+          kpis: ['-38% CPA Reduction', '99.4% Attribution Match', '14.2x Top Campaign'],
+          canvasType: 'analytics_nodes',
+          accentColor: '#818CF8'
+        }
+      ],
+      deliverables: [
+        'Full Account Audit & Conversion Tracking Setup (CAPI + Pixel)',
+        'Creative Testing Framework (Hook, Angle, UGC vs Static Testing)',
+        'Audience Segmentation (Lookalike, Broad 3.0, Dynamic Retargeting)',
+        'Weekly Budget Scaling & ROAS Stabilization Strategy'
+      ],
+      tools: ['Meta Ads Manager', 'Google Ads', 'GA4', 'Triple Whale', 'Canva Pro', 'Figma']
+    },
+    'seo': {
+      tag: 'Organic Search Growth Proof',
+      title: 'Technical & On-Page SEO Case Study & Audit Walkthrough',
+      subtitle: 'Dominating search engine results pages through technical excellence and high-intent topical authority.',
+      serviceValue: 'digital-marketing',
+      videos: [
+        {
+          id: 'seo-v1',
+          badge: 'Technical SEO • Schema JSON-LD',
+          duration: '1:20',
+          title: '0 to 500K Monthly Organic Impressions Case Study',
+          desc: 'In-depth audit fixing crawl budget bottlenecks, implementing structured schema markup, and optimizing Core Web Vitals.',
+          kpis: ['+340% Traffic Spike', '98 Core Web Vitals', '#1 Top Keyword Ranking'],
+          canvasType: 'seo_rankings',
+          accentColor: '#34D399'
+        },
+        {
+          id: 'seo-v2',
+          badge: 'Keyword Clustering • On-Page',
+          duration: '0:55',
+          title: 'Topical Authority & Commercial Intent Keyword Domination',
+          desc: 'Semantic content clusters targeting buyer-ready keywords, internal link distribution, and backlink authority generation.',
+          kpis: ['45+ First Page Ranks', '+240% Lead Inquiries', 'Zero Spam Score'],
+          canvasType: 'seo_cluster',
+          accentColor: '#D4AF37'
+        }
+      ],
+      deliverables: [
+        'Comprehensive Technical SEO & Crawl Budget Health Audit',
+        'Topical Keyword Clustering & Commercial Intent Mapping',
+        'Rich Snippets & Structured Data (Schema.org JSON-LD) Implementation',
+        'Core Web Vitals Speed & Mobile Usability Optimization'
+      ],
+      tools: ['SEMrush', 'Ahrefs', 'Google Search Console', 'Screaming Frog', 'Yoast / RankMath', 'PageSpeed Insights']
+    }
+  };
+
+  let currentCategory = 'ai-video';
+  let activeAnimationFrames = {};
+
+  const renderCategory = (catKey) => {
+    currentCategory = catKey;
+    const data = matrixData[catKey];
+    if (!data) return;
+
+    // Update Header
+    modalTag.textContent = data.tag;
+    modalTitle.textContent = data.title;
+    modalSubtitle.textContent = data.subtitle;
+
+    // Update CTA link service
+    if (hireCta) {
+      hireCta.onclick = () => {
+        modal.classList.remove('open');
+        document.body.style.overflow = '';
+        const serviceSelect = document.getElementById('serviceInterest');
+        if (serviceSelect) {
+          serviceSelect.value = data.serviceValue;
+        }
+      };
+    }
+
+    // Update Tabs
+    tabsNav.forEach(tab => {
+      const isMatch = tab.getAttribute('data-tab') === catKey;
+      tab.classList.toggle('active', isMatch);
+      tab.setAttribute('aria-selected', isMatch ? 'true' : 'false');
+    });
+
+    // Clear previous canvas animations
+    Object.keys(activeAnimationFrames).forEach(k => {
+      cancelAnimationFrame(activeAnimationFrames[k]);
+    });
+    activeAnimationFrames = {};
+
+    // Render Video / Media Cards
+    gridContainer.innerHTML = '';
+    data.videos.forEach((vid) => {
+      const card = document.createElement('div');
+      card.className = 'matrix-video-card';
+      card.innerHTML = `
+        <div class="matrix-video-player-container" id="player_${vid.id}" data-playing="false">
+          <canvas class="matrix-canvas-player" id="canvas_${vid.id}"></canvas>
+          <div class="matrix-video-overlay" id="overlay_${vid.id}">
+            <div class="matrix-video-topbar">
+              <span class="matrix-badge-tag">${vid.badge}</span>
+              <span class="matrix-duration-badge">${vid.duration}</span>
+            </div>
+            <button type="button" class="matrix-play-center" aria-label="Play reference clip" id="playBtn_${vid.id}">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            </button>
+            <div class="matrix-video-controls">
+              <div class="matrix-progress-bar">
+                <div class="matrix-progress-fill" id="progress_${vid.id}"></div>
+              </div>
+              <div class="matrix-sound-wave">
+                <span class="matrix-wave-bar"></span>
+                <span class="matrix-wave-bar"></span>
+                <span class="matrix-wave-bar"></span>
+                <span class="matrix-wave-bar"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="matrix-video-info">
+          <h4 class="matrix-video-title">${vid.title}</h4>
+          <p class="matrix-video-desc">${vid.desc}</p>
+          <div class="matrix-kpi-chip-row">
+            ${vid.kpis.map((kpi, kIdx) => `<span class="matrix-kpi-chip ${kIdx === 0 ? 'gold' : kIdx === 1 ? 'green' : ''}">${kpi}</span>`).join('')}
+          </div>
+        </div>
+      `;
+      gridContainer.appendChild(card);
+
+      // Start Canvas Animation
+      setTimeout(() => {
+        initCanvasForVideo(vid);
+      }, 30);
+    });
+
+    // Render Strategy Box
+    strategyContainer.innerHTML = `
+      <div class="matrix-strategy-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        Proven Methodology &amp; Execution Strategy:
+      </div>
+      <ul class="matrix-deliverables-grid">
+        ${data.deliverables.map(d => `
+          <li class="matrix-deliverable-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>${d}</span>
+          </li>
+        `).join('')}
+      </ul>
+      <div class="matrix-tools-row">
+        <span>Tools &amp; Tech Stack:</span>
+        ${data.tools.map(tool => `<span class="matrix-tool-tag">${tool}</span>`).join('')}
+      </div>
+    `;
+  };
+
+  // Canvas Drawing & Interactive Player Simulation
+  const initCanvasForVideo = (vid) => {
+    const canvas = document.getElementById(`canvas_${vid.id}`);
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById(`player_${vid.id}`);
+    const playBtn = document.getElementById(`playBtn_${vid.id}`);
+    const progressFill = document.getElementById(`progress_${vid.id}`);
+
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * (window.devicePixelRatio || 1) || 640;
+    canvas.height = rect.height * (window.devicePixelRatio || 1) || 360;
+
+    let isPlaying = false;
+    let progress = 0;
+    let tick = 0;
+
+    const particles = Array.from({ length: 45 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 1.5,
+      vy: (Math.random() - 0.5) * 1.5,
+      size: Math.random() * 3 + 1,
+      color: Math.random() > 0.5 ? vid.accentColor : '#60A5FA'
+    }));
+
+    const renderFrame = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      tick++;
+
+      // Background Gradient
+      const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      grad.addColorStop(0, '#060D1E');
+      grad.addColorStop(0.5, '#0c1836');
+      grad.addColorStop(1, '#050914');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Cyber Grid / Wave Lines
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.08)';
+      ctx.lineWidth = 1;
+      const gridSize = 35;
+      for (let x = 0; x < canvas.width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+
+      // Draw Animated Particles & Connectors
+      particles.forEach((p, i) => {
+        p.x += isPlaying ? p.vx * 2.2 : p.vx;
+        p.y += isPlaying ? p.vy * 2.2 : p.vy;
+
+        if (p.x < 0) p.x = canvas.width;
+        if (p.x > canvas.width) p.x = 0;
+        if (p.y < 0) p.y = canvas.height;
+        if (p.y > canvas.height) p.y = 0;
+
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = isPlaying ? 12 : 4;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Connect nearby particles
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+          if (dist < 75) {
+            ctx.strokeStyle = `rgba(56, 189, 248, ${0.18 * (1 - dist / 75)})`;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+        }
+      });
+
+      // Animated Sine Waveform in Center
+      ctx.beginPath();
+      ctx.strokeStyle = isPlaying ? vid.accentColor : 'rgba(212, 175, 55, 0.4)';
+      ctx.lineWidth = isPlaying ? 3 : 1.5;
+      ctx.shadowColor = vid.accentColor;
+      ctx.shadowBlur = isPlaying ? 16 : 6;
+      for (let x = 0; x < canvas.width; x += 5) {
+        const freq = isPlaying ? 0.03 : 0.015;
+        const speed = isPlaying ? tick * 0.08 : tick * 0.02;
+        const amp = isPlaying ? 35 : 18;
+        const y = canvas.height / 2 + Math.sin(x * freq + speed) * amp * Math.sin(x / canvas.width * Math.PI);
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // Center Visual Badge
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.font = 'bold 13px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      if (isPlaying) {
+        ctx.fillText(`▶ LIVE BENCHMARK REEL • ${Math.round(progress)}%`, canvas.width / 2, canvas.height - 25);
+      }
+
+      if (isPlaying) {
+        progress += 0.4;
+        if (progress > 100) progress = 0;
+        if (progressFill) progressFill.style.width = `${progress}%`;
+      }
+
+      activeAnimationFrames[vid.id] = requestAnimationFrame(renderFrame);
+    };
+
+    renderFrame();
+
+    // Toggle Play/Pause on click
+    const togglePlay = (e) => {
+      if (e) e.stopPropagation();
+      isPlaying = !isPlaying;
+      if (container) container.setAttribute('data-playing', isPlaying ? 'true' : 'false');
+      if (playBtn) {
+        playBtn.innerHTML = isPlaying
+          ? `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>`
+          : `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`;
+      }
+    };
+
+    if (container) container.onclick = togglePlay;
+  };
+
+  // Open Modal Function
+  const openModal = (tabKey = 'ai-video') => {
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    renderCategory(tabKey);
+  };
+
+  // Close Modal Function
+  const closeModal = () => {
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+    Object.keys(activeAnimationFrames).forEach(k => {
+      cancelAnimationFrame(activeAnimationFrames[k]);
+    });
+    activeAnimationFrames = {};
+  };
+
+  // Event Listeners for Hero Chart Bars
+  chartBars.forEach(bar => {
+    const tabKey = bar.getAttribute('data-matrix-tab') || 'ai-video';
+    bar.addEventListener('click', () => openModal(tabKey));
+    bar.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openModal(tabKey);
+      }
+    });
+  });
+
+  if (hintBtn) {
+    hintBtn.addEventListener('click', () => openModal('ai-video'));
+  }
+
+  // Tab Switchers inside Modal
+  tabsNav.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const tabKey = tab.getAttribute('data-tab') || 'ai-video';
+      renderCategory(tabKey);
+    });
+  });
+
+  // Close Buttons
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (closeFooterBtn) closeFooterBtn.addEventListener('click', closeModal);
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('open')) {
+      closeModal();
+    }
+  });
 }
