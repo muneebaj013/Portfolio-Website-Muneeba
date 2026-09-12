@@ -1614,7 +1614,7 @@ async function initDynamicContentSync() {
    -------------------------------------------------------------------------- */
 function initClientReviewSubmission() {
   const modal = document.getElementById('clientReviewModal');
-  const openBtns = document.querySelectorAll('#openReviewModalBtn, .open-review-modal-btn');
+  const openBtns = document.querySelectorAll('#openReviewModalBtn, #openReviewModalBtnTop, #openReviewModalBtnBottom, .open-review-modal-btn');
   const closeBtn = document.getElementById('closeReviewModalBtn');
   const cancelBtn = document.getElementById('cancelReviewBtn');
   const form = document.getElementById('publicReviewForm');
@@ -1622,7 +1622,8 @@ function initClientReviewSubmission() {
 
   if (!modal) return;
 
-  const openModal = () => {
+  const openModal = (e) => {
+    if (e) e.preventDefault();
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
     if (successMsg) successMsg.style.display = 'none';
@@ -1633,7 +1634,17 @@ function initClientReviewSubmission() {
     document.body.style.overflow = '';
   };
 
-  openBtns.forEach(btn => btn.addEventListener('click', openModal));
+  openBtns.forEach(btn => {
+    btn.addEventListener('click', openModal);
+  });
+
+  // Delegated click listener in case buttons are dynamically re-rendered
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.open-review-modal-btn') || e.target.closest('#openReviewModalBtn') || e.target.closest('#openReviewModalBtnTop') || e.target.closest('#openReviewModalBtnBottom')) {
+      openModal(e);
+    }
+  });
+
   if (closeBtn) closeBtn.addEventListener('click', closeModal);
   if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
 
@@ -1641,14 +1652,29 @@ function initClientReviewSubmission() {
     if (e.target === modal) closeModal();
   });
 
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('open')) {
+      closeModal();
+    }
+  });
+
   if (form) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const submitBtn = document.getElementById('submitReviewBtn');
       const name = document.getElementById('clientRevName').value.trim();
       const role = document.getElementById('clientRevRole').value.trim();
       const rating = parseInt(document.getElementById('clientRevRating').value, 10) || 5;
       const quote = document.getElementById('clientRevQuote').value.trim();
-      const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'CL';
+      const initials = name.split(' ').filter(Boolean).map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'CL';
+
+      if (!name || !quote) return;
+
+      const originalText = submitBtn ? submitBtn.innerHTML : 'Submit Review';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Submitting...';
+      }
 
       const newReview = {
         id: 'rev-' + Date.now(),
@@ -1682,12 +1708,17 @@ function initClientReviewSubmission() {
         }
       }
 
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+      }
+
       if (successMsg) successMsg.style.display = 'block';
       form.reset();
 
       setTimeout(() => {
         closeModal();
-      }, 3000);
+      }, 2500);
     });
   }
 }
