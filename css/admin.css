@@ -1031,3 +1031,352 @@ textarea.form-control {
     grid-template-columns: 1fr;
   }
 }
+
+/* --------------------------------------------------------------------------
+   10. Enterprise Password Management & Verification Suite
+   -------------------------------------------------------------------------- */
+.password-field-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.password-field-wrapper .form-control,
+.password-field-wrapper .auth-input {
+  padding-right: 2.75rem !important;
+  width: 100%;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+  z-index: 2;
+}
+
+.password-toggle-btn:hover {
+  color: var(--accent-cyan);
+  background: rgba(56, 189, 248, 0.1);
+}
+
+/* Password Strength Meter */
+.password-strength-container {
+  margin-top: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  background: rgba(7, 13, 30, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-md);
+}
+
+.strength-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.strength-label {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.strength-text {
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.5px;
+}
+
+.strength-bar-track {
+  width: 100%;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  position: relative;
+}
+
+.strength-bar-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: var(--radius-pill);
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.strength-weak { width: 25%; background-color: var(--danger); }
+.strength-fair { width: 50%; background-color: var(--warning); }
+.strength-good { width: 75%; background-color: #38BDF8; }
+.strength-strong { width: 100%; background-color: var(--success); box-shadow: 0 0 10px rgba(52, 211, 153, 0.5); }
+
+.password-rules-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+  list-style: none;
+  padding-left: 0;
+}
+
+.password-rule-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  transition: color var(--transition);
+}
+
+.password-rule-item.valid {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.password-rule-item.valid .rule-icon {
+  color: var(--success);
+}
+
+/* Match Indicator */
+.password-match-indicator {
+  font-size: 0.75rem;
+  margin-top: 0.35rem;
+  font-weight: 600;
+  display: none;
+}
+
+.password-match-indicator.match {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--success);
+}
+
+.password-match-indicator.mismatch {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--danger);
+}
+
+/* Multi-Step Wizard */
+.wizard-steps-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  position: relative;
+  padding: 0 0.5rem;
+}
+
+.wizard-step-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  z-index: 2;
+}
+
+.wizard-node-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+
+.wizard-step-node.active .wizard-node-circle {
+  background: linear-gradient(135deg, var(--secondary) 0%, var(--accent-cyan) 100%);
+  border-color: var(--accent-cyan);
+  color: #FFFFFF;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+}
+
+.wizard-step-node.completed .wizard-node-circle {
+  background: var(--success);
+  border-color: var(--success);
+  color: #070D1E;
+}
+
+.wizard-node-text {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.wizard-step-node.active .wizard-node-text {
+  color: #FFFFFF;
+}
+
+.wizard-step-node.completed .wizard-node-text {
+  color: var(--success);
+}
+
+.wizard-step-pane {
+  display: none;
+  animation: fadeInStep 0.3s ease-out;
+}
+
+.wizard-step-pane.active {
+  display: block;
+}
+
+@keyframes fadeInStep {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Verification Method Card Option */
+.verify-method-card {
+  background: rgba(7, 13, 30, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.9rem 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.verify-method-card:hover,
+.verify-method-card.selected {
+  border-color: var(--accent-cyan);
+  background: rgba(56, 189, 248, 0.08);
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
+}
+
+.verify-method-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.verify-method-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--accent-cyan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.verify-method-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.verify-method-detail {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* OTP 6-Digit Grid */
+.otp-inputs-grid {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin: 1.25rem 0;
+}
+
+.otp-digit-box {
+  width: 46px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  background: rgba(7, 13, 30, 0.8);
+  border: 1px solid var(--border-color);
+  color: #FFFFFF;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  font-family: var(--font-heading);
+  transition: var(--transition);
+}
+
+.otp-digit-box:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+  background: rgba(7, 13, 30, 0.95);
+  transform: translateY(-2px);
+}
+
+.otp-notice-banner {
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px dashed rgba(56, 189, 248, 0.35);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.otp-copy-chip {
+  background: rgba(56, 189, 248, 0.2);
+  color: var(--accent-cyan);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-sm);
+  font-family: monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.otp-copy-chip:hover {
+  background: var(--accent-cyan);
+  color: #070D1E;
+}
+
+.resend-timer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.75rem;
+}
+
+.resend-code-btn {
+  background: none;
+  border: none;
+  color: var(--accent-cyan);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.resend-code-btn:disabled {
+  color: var(--text-muted);
+  cursor: not-allowed;
+  text-decoration: none;
+  opacity: 0.6;
+}

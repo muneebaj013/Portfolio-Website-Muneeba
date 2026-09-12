@@ -37,7 +37,13 @@
       <form id="authForm" class="auth-form">
         <div class="auth-input-group">
           <label for="authPinInput" class="auth-label">Enter Security PIN / Password</label>
-          <input type="password" id="authPinInput" class="auth-input" placeholder="Enter PIN..." required autofocus autocomplete="current-password">
+          <div class="password-field-wrapper">
+            <input type="password" id="authPinInput" class="auth-input" placeholder="Enter PIN..." required autofocus autocomplete="current-password">
+            <button type="button" class="password-toggle-btn" data-target="authPinInput" aria-label="Toggle PIN Visibility" title="Show/Hide PIN">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="eye-open-icon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="eye-closed-icon" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+            </button>
+          </div>
         </div>
         <button type="submit" class="auth-btn">
           <span>Unlock Dashboard</span>
@@ -452,24 +458,87 @@ create policy "Public modify inquiries" on inquiries for all using (true);</pre>
             </div>
           </div>
 
-          <!-- Change PIN -->
+          <!-- Change PIN / Password Credentials Suite -->
           <div class="settings-section">
             <div class="settings-header">
               <div class="settings-icon">🔑</div>
               <div>
-                <h3 class="settings-title">Change Admin Security PIN</h3>
-                <p style="font-size: 0.82rem; color:var(--text-muted);">Update the security passcode required to access this admin portal.</p>
+                <h3 class="settings-title">Security &amp; Password Credentials</h3>
+                <p style="font-size: 0.82rem; color:var(--text-muted);">Manage and update your master authentication passcode with enterprise security validation.</p>
               </div>
             </div>
 
-            <form id="changePinForm" style="max-width: 380px;">
-              <div class="form-group">
-                <label class="form-label">New PIN / Password</label>
-                <input type="password" class="form-control" id="newPinInput" placeholder="Enter new PIN..." required minlength="4">
+            <form id="changePinForm" style="max-width: 540px;" novalidate>
+              
+              <!-- 1. Current Password -->
+              <div class="form-group" style="margin-bottom: 1.25rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                  <label class="form-label" for="currentPinInput" style="margin-bottom: 0;">Current PIN / Password *</label>
+                  <button type="button" id="openForgotPinFromSettingsBtn" style="background: none; border: none; color: var(--accent-cyan); font-size: 0.78rem; cursor: pointer; text-decoration: underline;">
+                    Forgot Current PIN?
+                  </button>
+                </div>
+                <div class="password-field-wrapper">
+                  <input type="password" class="form-control" id="currentPinInput" placeholder="Enter current security PIN..." required autocomplete="current-password">
+                  <button type="button" class="password-toggle-btn" data-target="currentPinInput" aria-label="Toggle Visibility" title="Show/Hide">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="eye-open-icon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="eye-closed-icon" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                  </button>
+                </div>
+                <small id="currentPinError" style="color: var(--danger); font-size: 0.78rem; display: none; margin-top: 0.35rem;">Incorrect current PIN. Please check or use the reset wizard.</small>
               </div>
-              <div style="margin-top: 1rem;">
-                <button type="submit" class="btn-action-primary">Update PIN</button>
+
+              <!-- 2. New Password -->
+              <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label class="form-label" for="newPinInput">New PIN / Password *</label>
+                <div class="password-field-wrapper">
+                  <input type="password" class="form-control" id="newPinInput" placeholder="Enter new PIN or password (min 6 chars)..." required minlength="6" autocomplete="new-password">
+                  <button type="button" class="password-toggle-btn" data-target="newPinInput" aria-label="Toggle Visibility" title="Show/Hide">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="eye-open-icon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="eye-closed-icon" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                  </button>
+                </div>
+
+                <!-- Password Strength Meter -->
+                <div class="password-strength-container" id="passwordStrengthBox" style="display: none;">
+                  <div class="strength-meta-row">
+                    <span class="strength-label">Password Strength:</span>
+                    <span class="strength-text" id="strengthRatingText">Weak</span>
+                  </div>
+                  <div class="strength-bar-track">
+                    <div class="strength-bar-fill" id="strengthProgressBar"></div>
+                  </div>
+                  <ul class="password-rules-list">
+                    <li class="password-rule-item" id="ruleMinLen"><span class="rule-icon">○</span> At least 6 characters</li>
+                    <li class="password-rule-item" id="ruleHasNum"><span class="rule-icon">○</span> Numbers / Digits (0-9)</li>
+                    <li class="password-rule-item" id="ruleHasLetter"><span class="rule-icon">○</span> Letters (a-z, A-Z)</li>
+                    <li class="password-rule-item" id="ruleHasSpecial"><span class="rule-icon">○</span> Special Symbols (@#$)</li>
+                  </ul>
+                </div>
               </div>
+
+              <!-- 3. Confirm New Password -->
+              <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label class="form-label" for="confirmPinInput">Confirm New PIN / Password *</label>
+                <div class="password-field-wrapper">
+                  <input type="password" class="form-control" id="confirmPinInput" placeholder="Re-enter your new PIN..." required minlength="6" autocomplete="new-password">
+                  <button type="button" class="password-toggle-btn" data-target="confirmPinInput" aria-label="Toggle Visibility" title="Show/Hide">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="eye-open-icon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="eye-closed-icon" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                  </button>
+                </div>
+                <div class="password-match-indicator" id="pinMatchIndicator">
+                  <span id="matchIcon">✓</span> <span id="matchText">Passwords match perfectly</span>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <button type="submit" class="btn-action-primary" id="updatePinSubmitBtn">
+                  <span>Update Security PIN</span>
+                </button>
+                <button type="reset" class="btn-secondary" id="resetPinFormBtn">Clear Form</button>
+              </div>
+
             </form>
           </div>
 
@@ -602,39 +671,197 @@ create policy "Public modify inquiries" on inquiries for all using (true);</pre>
   </div>
 
   <!-- ======================================================================
-       5. FORGOT / RESET PIN MODAL
+       5. FORGOT / RESET PIN MULTI-STEP VERIFICATION WIZARD
        ====================================================================== -->
   <div class="admin-modal-overlay" id="forgotPinModalOverlay">
-    <div class="admin-modal-box" style="max-width: 460px;">
+    <div class="admin-modal-box" style="max-width: 520px;">
       <div class="modal-header-row">
-        <h3 class="modal-title">Reset Admin Security PIN</h3>
+        <h3 class="modal-title" id="forgotWizardTitle">Security PIN Reset Wizard</h3>
         <button type="button" class="modal-close" id="closeForgotPinModal">&times;</button>
       </div>
 
-      <form id="recoveryPinForm">
+      <!-- Step Indicator Header -->
+      <div class="wizard-steps-header">
+        <div class="wizard-step-node active" id="wizardNode1">
+          <div class="wizard-node-circle">1</div>
+          <span class="wizard-node-text">Method</span>
+        </div>
+        <div class="wizard-step-node" id="wizardNode2">
+          <div class="wizard-node-circle">2</div>
+          <span class="wizard-node-text">Verify Code</span>
+        </div>
+        <div class="wizard-step-node" id="wizardNode3">
+          <div class="wizard-node-circle">3</div>
+          <span class="wizard-node-text">New PIN</span>
+        </div>
+      </div>
+
+      <!-- ================= STEP 1: METHOD SELECTION ================= -->
+      <div class="wizard-step-pane active" id="wizardPaneStep1">
         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
-          Enter your registered admin email (<code style="color:var(--accent-cyan);">muneebaj013@gmail.com</code>) or Master Recovery Key (<code style="color:var(--highlight);">muneeba2026</code>) to set a new PIN.
+          Choose how you want to verify your identity to reset your admin passcode:
         </p>
 
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label class="form-label">Admin Email or Recovery Key *</label>
-          <input type="text" class="form-control" id="recoveryEmailInput" placeholder="muneebaj013@gmail.com or muneeba2026" required>
+        <!-- Option 1: Registered Email -->
+        <div class="verify-method-card selected" data-method="email" id="methodCardEmail">
+          <div class="verify-method-left">
+            <div class="verify-method-icon">✉️</div>
+            <div>
+              <div class="verify-method-title">Email Verification (OTP)</div>
+              <div class="verify-method-detail">Send 6-digit code to <strong>muneebaj013@gmail.com</strong></div>
+            </div>
+          </div>
+          <input type="radio" name="recoveryMethod" value="email" checked style="accent-color: var(--accent-cyan); width: 18px; height: 18px;">
         </div>
 
-        <div class="form-group" style="margin-bottom: 1.25rem;">
-          <label class="form-label">New Security PIN (Min 4 digits) *</label>
-          <input type="password" class="form-control" id="newRecoveryPinInput" placeholder="Enter new PIN..." required minlength="4">
+        <!-- Option 2: Registered Phone / WhatsApp -->
+        <div class="verify-method-card" data-method="phone" id="methodCardPhone">
+          <div class="verify-method-left">
+            <div class="verify-method-icon">📱</div>
+            <div>
+              <div class="verify-method-title">Phone / WhatsApp OTP</div>
+              <div class="verify-method-detail">Send code to <strong>+92 320 6779402</strong></div>
+            </div>
+          </div>
+          <input type="radio" name="recoveryMethod" value="phone" style="accent-color: var(--accent-cyan); width: 18px; height: 18px;">
         </div>
 
-        <p id="recoveryErrorMsg" style="display: none; color: var(--danger); font-size: 0.8rem; margin-bottom: 1rem;">
-          Invalid email or recovery key. Please check your credentials.
-        </p>
+        <!-- Option 3: Master Recovery Key -->
+        <div class="verify-method-card" data-method="key" id="methodCardKey">
+          <div class="verify-method-left">
+            <div class="verify-method-icon">🛡️</div>
+            <div>
+              <div class="verify-method-title">Master Recovery Passkey</div>
+              <div class="verify-method-detail">Enter your emergency master recovery passphrase</div>
+            </div>
+          </div>
+          <input type="radio" name="recoveryMethod" value="key" style="accent-color: var(--accent-cyan); width: 18px; height: 18px;">
+        </div>
+
+        <!-- Input for Master Passkey (Shown only when option 3 is selected) -->
+        <div id="masterKeyInputContainer" style="display: none; margin-top: 1rem;">
+          <label class="form-label" for="wizardMasterKeyInput">Enter Master Recovery Passphrase *</label>
+          <input type="text" class="form-control" id="wizardMasterKeyInput" placeholder="Enter emergency passkey (e.g. muneeba2026)">
+          <small id="wizardMasterKeyError" style="color: var(--danger); font-size: 0.78rem; display: none; margin-top: 0.35rem;">Invalid master recovery passkey. Please check again.</small>
+        </div>
 
         <div class="modal-footer-row">
-          <button type="button" class="btn-secondary" id="cancelRecoveryBtn">Cancel</button>
-          <button type="submit" class="btn-action-primary">Reset PIN &amp; Login</button>
+          <button type="button" class="btn-secondary" id="cancelWizardBtn1">Cancel</button>
+          <button type="button" class="btn-action-primary" id="wizardProceedToStep2Btn">
+            <span>Send Verification Code &rarr;</span>
+          </button>
         </div>
-      </form>
+      </div>
+
+      <!-- ================= STEP 2: OTP VERIFICATION ================= -->
+      <div class="wizard-step-pane" id="wizardPaneStep2">
+        <div class="otp-notice-banner">
+          <div>
+            <div style="font-size: 0.8rem; font-weight: 700; color: #FFFFFF; margin-bottom: 2px;">Verification Code Dispatched</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);" id="otpTargetDisplay">Sent to muneebaj013@gmail.com</div>
+          </div>
+          <button type="button" class="otp-copy-chip" id="autoFillOtpBtn" title="Click to auto-fill generated OTP">
+            Fill Code: <span id="generatedOtpDisplay">------</span>
+          </button>
+        </div>
+
+        <p style="font-size: 0.82rem; color: var(--text-muted); text-align: center;">
+          Enter the 6-digit security verification code below:
+        </p>
+
+        <!-- 6 OTP Digit Boxes -->
+        <div class="otp-inputs-grid" id="otpInputsContainer">
+          <input type="text" class="otp-digit-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" autofocus>
+          <input type="text" class="otp-digit-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+          <input type="text" class="otp-digit-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+          <input type="text" class="otp-digit-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+          <input type="text" class="otp-digit-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+          <input type="text" class="otp-digit-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+        </div>
+
+        <p id="otpErrorMsg" style="display: none; text-align: center; color: var(--danger); font-size: 0.8rem; margin-bottom: 0.75rem;">
+          Incorrect verification code. Please try again.
+        </p>
+
+        <div class="resend-timer-row">
+          <span>Didn't receive the code?</span>
+          <button type="button" class="resend-code-btn" id="resendOtpBtn" disabled>
+            Resend in <span id="resendCountdown">45</span>s
+          </button>
+        </div>
+
+        <div class="modal-footer-row">
+          <button type="button" class="btn-secondary" id="wizardBackToStep1Btn">&larr; Back</button>
+          <button type="button" class="btn-action-primary" id="wizardVerifyOtpBtn">
+            <span>Verify &amp; Continue &rarr;</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ================= STEP 3: CREATE NEW PIN ================= -->
+      <div class="wizard-step-pane" id="wizardPaneStep3">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+          Identity successfully verified! Please establish your new security PIN / password:
+        </p>
+
+        <form id="wizardResetForm" novalidate>
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label" for="wizardNewPinInput">New PIN / Password *</label>
+            <div class="password-field-wrapper">
+              <input type="password" class="form-control" id="wizardNewPinInput" placeholder="Enter new PIN (min 6 characters)..." required minlength="6">
+              <button type="button" class="password-toggle-btn" data-target="wizardNewPinInput" aria-label="Toggle Visibility">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="eye-open-icon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="eye-closed-icon" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+              </button>
+            </div>
+
+            <!-- Password Strength Meter inside Wizard -->
+            <div class="password-strength-container" id="wizardStrengthBox" style="display: none;">
+              <div class="strength-meta-row">
+                <span class="strength-label">Password Strength:</span>
+                <span class="strength-text" id="wizardStrengthRatingText">Weak</span>
+              </div>
+              <div class="strength-bar-track">
+                <div class="strength-bar-fill" id="wizardStrengthProgressBar"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label" for="wizardConfirmPinInput">Confirm New PIN / Password *</label>
+            <div class="password-field-wrapper">
+              <input type="password" class="form-control" id="wizardConfirmPinInput" placeholder="Re-type new PIN..." required minlength="6">
+              <button type="button" class="password-toggle-btn" data-target="wizardConfirmPinInput" aria-label="Toggle Visibility">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="eye-open-icon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="eye-closed-icon" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+              </button>
+            </div>
+            <div class="password-match-indicator" id="wizardPinMatchIndicator">
+              <span>✓</span> <span>Passwords match</span>
+            </div>
+          </div>
+
+          <div class="modal-footer-row">
+            <button type="submit" class="btn-action-primary" id="wizardSavePinBtn">
+              <span>Save New Passcode &amp; Login</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- ================= STEP 4: SUCCESS CONFIRMATION ================= -->
+      <div class="wizard-step-pane" id="wizardPaneStep4" style="text-align: center; padding: 1.5rem 0;">
+        <div style="width: 68px; height: 68px; border-radius: 50%; background: rgba(52, 211, 153, 0.15); border: 2px solid var(--success); color: var(--success); display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1.25rem; box-shadow: 0 0 25px rgba(52, 211, 153, 0.4);">
+          ✓
+        </div>
+        <h4 style="color: #FFFFFF; font-size: 1.25rem; margin-bottom: 0.5rem; font-family: var(--font-heading);">
+          Security PIN Successfully Updated!
+        </h4>
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+          Your master authentication credentials have been reset. Accessing dashboard...
+        </p>
+      </div>
+
     </div>
   </div>
 

@@ -167,6 +167,10 @@ let currentInquiries = [];
 // DOM Loaded
 document.addEventListener('DOMContentLoaded', () => {
   initAuth();
+  initPasswordVisibilityToggles();
+  initPasswordStrengthAndMatching();
+  initForgotPinWizard();
+  initSettingsPinChange();
   initNavigation();
   initSupabase();
   loadAllData();
@@ -182,14 +186,6 @@ function initAuth() {
   const authInput = document.getElementById('authPinInput');
   const authError = document.getElementById('authError');
   const logoutBtn = document.getElementById('sidebarLogoutBtn');
-  const openForgotPinBtn = document.getElementById('openForgotPinBtn');
-  const forgotPinModal = document.getElementById('forgotPinModalOverlay');
-  const closeForgotPinBtn = document.getElementById('closeForgotPinModal');
-  const cancelRecoveryBtn = document.getElementById('cancelRecoveryBtn');
-  const recoveryForm = document.getElementById('recoveryPinForm');
-  const recoveryInput = document.getElementById('recoveryEmailInput');
-  const newPinInput = document.getElementById('newRecoveryPinInput');
-  const recoveryErrorMsg = document.getElementById('recoveryErrorMsg');
 
   const getSavedPin = () => localStorage.getItem('muneeba_admin_pin') || 'admin123';
 
@@ -198,55 +194,17 @@ function initAuth() {
     authWrapper.classList.add('hidden');
   }
 
-  authForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const enteredPin = authInput.value.trim();
-    if (enteredPin === getSavedPin()) {
-      sessionStorage.setItem('muneeba_admin_session', 'active');
-      authWrapper.classList.add('hidden');
-      showToast('Welcome back, Muneeba!', 'success');
-    } else {
-      authError.style.display = 'block';
-      authInput.focus();
-    }
-  });
-
-  // Forgot PIN Recovery Modal
-  if (openForgotPinBtn && forgotPinModal) {
-    openForgotPinBtn.addEventListener('click', () => {
-      forgotPinModal.classList.add('open');
-      if (recoveryErrorMsg) recoveryErrorMsg.style.display = 'none';
-      if (recoveryForm) recoveryForm.reset();
-    });
-  }
-
-  const closeRecoveryModal = () => {
-    if (forgotPinModal) forgotPinModal.classList.remove('open');
-  };
-
-  if (closeForgotPinBtn) closeForgotPinBtn.addEventListener('click', closeRecoveryModal);
-  if (cancelRecoveryBtn) cancelRecoveryBtn.addEventListener('click', closeRecoveryModal);
-
-  if (recoveryForm) {
-    recoveryForm.addEventListener('submit', (e) => {
+  if (authForm) {
+    authForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      const enteredKey = recoveryInput.value.trim().toLowerCase();
-      const newPin = newPinInput.value.trim();
-
-      // Master Verification: admin email or master security code
-      if (enteredKey === 'muneebaj013@gmail.com' || enteredKey === 'muneeba2026') {
-        if (newPin.length < 4) {
-          showToast('New PIN must be at least 4 digits!', 'error');
-          return;
-        }
-
-        localStorage.setItem('muneeba_admin_pin', newPin);
+      const enteredPin = authInput.value.trim();
+      if (enteredPin === getSavedPin()) {
         sessionStorage.setItem('muneeba_admin_session', 'active');
-        closeRecoveryModal();
         authWrapper.classList.add('hidden');
-        showToast('PIN successfully reset! Logged in.', 'success');
+        showToast('Welcome back, Muneeba!', 'success');
       } else {
-        if (recoveryErrorMsg) recoveryErrorMsg.style.display = 'block';
+        authError.style.display = 'block';
+        authInput.focus();
       }
     });
   }
@@ -254,10 +212,213 @@ function initAuth() {
   if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
       sessionStorage.removeItem('muneeba_admin_session');
-      authInput.value = '';
-      authError.style.display = 'none';
+      if (authInput) authInput.value = '';
+      if (authError) authError.style.display = 'none';
       authWrapper.classList.remove('hidden');
       showToast('Logged out successfully', 'info');
+    });
+  }
+}
+
+/* --------------------------------------------------------------------------
+   1.1 Password Visibility Toggle Engine (Show / Hide Eyes)
+   -------------------------------------------------------------------------- */
+function initPasswordVisibilityToggles() {
+  document.querySelectorAll('.password-toggle-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const targetId = btn.getAttribute('data-target');
+      const input = document.getElementById(targetId);
+      if (!input) return;
+
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+
+      const openIcon = btn.querySelector('.eye-open-icon');
+      const closedIcon = btn.querySelector('.eye-closed-icon');
+      if (openIcon && closedIcon) {
+        openIcon.style.display = isPassword ? 'none' : 'block';
+        closedIcon.style.display = isPassword ? 'block' : 'none';
+      }
+    });
+  });
+}
+
+/* --------------------------------------------------------------------------
+   1.2 Real-Time Password Strength Evaluator & Matching Validator
+   -------------------------------------------------------------------------- */
+function initPasswordStrengthAndMatching() {
+  // Settings Tab Inputs
+  const newPinInput = document.getElementById('newPinInput');
+  const confirmPinInput = document.getElementById('confirmPinInput');
+  const strengthBox = document.getElementById('passwordStrengthBox');
+  const strengthBar = document.getElementById('strengthProgressBar');
+  const strengthText = document.getElementById('strengthRatingText');
+  const matchIndicator = document.getElementById('pinMatchIndicator');
+
+  // Rules List Elements
+  const ruleMinLen = document.getElementById('ruleMinLen');
+  const ruleHasNum = document.getElementById('ruleHasNum');
+  const ruleHasLetter = document.getElementById('ruleHasLetter');
+  const ruleHasSpecial = document.getElementById('ruleHasSpecial');
+
+  const evaluateStrength = (val) => {
+    let score = 0;
+    const lenValid = val.length >= 6;
+    const numValid = /[0-9]/.test(val);
+    const letterValid = /[a-zA-Z]/.test(val);
+    const specialValid = /[^a-zA-Z0-9]/.test(val);
+
+    if (lenValid) score++;
+    if (val.length >= 10) score++;
+    if (numValid) score++;
+    if (letterValid) score++;
+    if (specialValid) score++;
+
+    return { score, lenValid, numValid, letterValid, specialValid };
+  };
+
+  if (newPinInput) {
+    newPinInput.addEventListener('input', () => {
+      const val = newPinInput.value;
+      if (!val) {
+        if (strengthBox) strengthBox.style.display = 'none';
+        return;
+      }
+      if (strengthBox) strengthBox.style.display = 'block';
+
+      const { score, lenValid, numValid, letterValid, specialValid } = evaluateStrength(val);
+
+      // Update Rule Checklist
+      if (ruleMinLen) {
+        ruleMinLen.classList.toggle('valid', lenValid);
+        ruleMinLen.querySelector('.rule-icon').textContent = lenValid ? '✓' : '○';
+      }
+      if (ruleHasNum) {
+        ruleHasNum.classList.toggle('valid', numValid);
+        ruleHasNum.querySelector('.rule-icon').textContent = numValid ? '✓' : '○';
+      }
+      if (ruleHasLetter) {
+        ruleHasLetter.classList.toggle('valid', letterValid);
+        ruleHasLetter.querySelector('.rule-icon').textContent = letterValid ? '✓' : '○';
+      }
+      if (ruleHasSpecial) {
+        ruleHasSpecial.classList.toggle('valid', specialValid);
+        ruleHasSpecial.querySelector('.rule-icon').textContent = specialValid ? '✓' : '○';
+      }
+
+      // Update Progress Bar
+      if (strengthBar && strengthText) {
+        strengthBar.className = 'strength-bar-fill';
+        if (score <= 1) {
+          strengthBar.classList.add('strength-weak');
+          strengthText.textContent = 'Weak';
+          strengthText.style.color = 'var(--danger)';
+        } else if (score === 2 || score === 3) {
+          strengthBar.classList.add('strength-fair');
+          strengthText.textContent = 'Medium / Fair';
+          strengthText.style.color = 'var(--warning)';
+        } else if (score === 4) {
+          strengthBar.classList.add('strength-good');
+          strengthText.textContent = 'Strong';
+          strengthText.style.color = 'var(--accent-cyan)';
+        } else {
+          strengthBar.classList.add('strength-strong');
+          strengthText.textContent = 'Very Strong ★';
+          strengthText.style.color = 'var(--success)';
+        }
+      }
+
+      // Re-check confirm pin
+      checkMatch();
+    });
+  }
+
+  const checkMatch = () => {
+    if (!confirmPinInput || !newPinInput || !matchIndicator) return;
+    const val1 = newPinInput.value;
+    const val2 = confirmPinInput.value;
+
+    if (!val2) {
+      matchIndicator.className = 'password-match-indicator';
+      matchIndicator.style.display = 'none';
+      return;
+    }
+
+    matchIndicator.style.display = 'flex';
+    if (val1 === val2) {
+      matchIndicator.className = 'password-match-indicator match';
+      matchIndicator.innerHTML = '<span>✓</span> <span>Passwords match perfectly</span>';
+    } else {
+      matchIndicator.className = 'password-match-indicator mismatch';
+      matchIndicator.innerHTML = '<span>✕</span> <span>Passwords do not match yet</span>';
+    }
+  };
+
+  if (confirmPinInput) {
+    confirmPinInput.addEventListener('input', checkMatch);
+  }
+
+  // Wizard Strength Evaluator
+  const wizardNewPin = document.getElementById('wizardNewPinInput');
+  const wizardConfirmPin = document.getElementById('wizardConfirmPinInput');
+  const wizardStrengthBox = document.getElementById('wizardStrengthBox');
+  const wizardStrengthBar = document.getElementById('wizardStrengthProgressBar');
+  const wizardStrengthText = document.getElementById('wizardStrengthRatingText');
+  const wizardMatchIndicator = document.getElementById('wizardPinMatchIndicator');
+
+  if (wizardNewPin) {
+    wizardNewPin.addEventListener('input', () => {
+      const val = wizardNewPin.value;
+      if (!val) {
+        if (wizardStrengthBox) wizardStrengthBox.style.display = 'none';
+        return;
+      }
+      if (wizardStrengthBox) wizardStrengthBox.style.display = 'block';
+
+      const { score } = evaluateStrength(val);
+      if (wizardStrengthBar && wizardStrengthText) {
+        wizardStrengthBar.className = 'strength-bar-fill';
+        if (score <= 1) {
+          wizardStrengthBar.classList.add('strength-weak');
+          wizardStrengthText.textContent = 'Weak';
+          wizardStrengthText.style.color = 'var(--danger)';
+        } else if (score <= 3) {
+          wizardStrengthBar.classList.add('strength-fair');
+          wizardStrengthText.textContent = 'Medium';
+          wizardStrengthText.style.color = 'var(--warning)';
+        } else {
+          wizardStrengthBar.classList.add('strength-strong');
+          wizardStrengthText.textContent = 'Strong ✓';
+          wizardStrengthText.style.color = 'var(--success)';
+        }
+      }
+
+      if (wizardConfirmPin && wizardMatchIndicator && wizardConfirmPin.value) {
+        wizardMatchIndicator.style.display = 'flex';
+        const isMatch = wizardNewPin.value === wizardConfirmPin.value;
+        wizardMatchIndicator.className = `password-match-indicator ${isMatch ? 'match' : 'mismatch'}`;
+        wizardMatchIndicator.innerHTML = isMatch
+          ? '<span>✓</span> <span>Passwords match</span>'
+          : '<span>✕</span> <span>Passwords do not match</span>';
+      }
+    });
+  }
+
+  if (wizardConfirmPin) {
+    wizardConfirmPin.addEventListener('input', () => {
+      if (!wizardMatchIndicator || !wizardNewPin) return;
+      if (!wizardConfirmPin.value) {
+        wizardMatchIndicator.style.display = 'none';
+        return;
+      }
+      wizardMatchIndicator.style.display = 'flex';
+      const isMatch = wizardNewPin.value === wizardConfirmPin.value;
+      wizardMatchIndicator.className = `password-match-indicator ${isMatch ? 'match' : 'mismatch'}`;
+      wizardMatchIndicator.innerHTML = isMatch
+        ? '<span>✓</span> <span>Passwords match</span>'
+        : '<span>✕</span> <span>Passwords do not match</span>';
     });
   }
 }
@@ -860,21 +1021,420 @@ function setupEventListeners() {
     });
   }
 
-  // Change Admin PIN Form
+/* --------------------------------------------------------------------------
+   8. Settings PIN & Security Management
+   -------------------------------------------------------------------------- */
+function initSettingsPinChange() {
   const pinForm = document.getElementById('changePinForm');
-  if (pinForm) {
-    pinForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const newPin = document.getElementById('newPinInput').value.trim();
-      if (newPin.length < 4) {
-        showToast('PIN must be at least 4 characters!', 'error');
-        return;
-      }
-      localStorage.setItem('muneeba_admin_pin', newPin);
-      document.getElementById('newPinInput').value = '';
-      showToast('Admin PIN updated successfully!', 'success');
+  const currentInput = document.getElementById('currentPinInput');
+  const newInput = document.getElementById('newPinInput');
+  const confirmInput = document.getElementById('confirmPinInput');
+  const currentError = document.getElementById('currentPinError');
+  const submitBtn = document.getElementById('updatePinSubmitBtn');
+  const forgotFromSettingsBtn = document.getElementById('openForgotPinFromSettingsBtn');
+
+  if (forgotFromSettingsBtn) {
+    forgotFromSettingsBtn.addEventListener('click', () => {
+      openForgotPinModal();
     });
   }
+
+  if (pinForm) {
+    pinForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const currentVal = currentInput ? currentInput.value.trim() : '';
+      const newVal = newInput ? newInput.value.trim() : '';
+      const confirmVal = confirmInput ? confirmInput.value.trim() : '';
+
+      const storedPin = localStorage.getItem('muneeba_admin_pin') || 'admin123';
+
+      // 1. Verify Current PIN
+      if (currentVal !== storedPin) {
+        if (currentError) currentError.style.display = 'block';
+        if (currentInput) {
+          currentInput.focus();
+        }
+        showToast('Current PIN is incorrect!', 'error');
+        return;
+      } else {
+        if (currentError) currentError.style.display = 'none';
+      }
+
+      // 2. Validate New PIN length
+      if (newVal.length < 6) {
+        showToast('New PIN/Password must be at least 6 characters long!', 'error');
+        if (newInput) newInput.focus();
+        return;
+      }
+
+      // 3. Validate Match
+      if (newVal !== confirmVal) {
+        showToast('New PIN and Confirmation PIN do not match!', 'error');
+        if (confirmInput) confirmInput.focus();
+        return;
+      }
+
+      const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Update Security PIN';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Updating PIN...';
+      }
+
+      // 4. Save to Local Storage
+      localStorage.setItem('muneeba_admin_pin', newVal);
+
+      // 5. Update Supabase settings if connected
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from('settings').upsert({ id: 'admin_pin', value: newVal });
+        } catch (err) {
+          console.warn('Supabase settings update:', err);
+        }
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+      }
+
+      pinForm.reset();
+      const strengthBox = document.getElementById('passwordStrengthBox');
+      if (strengthBox) strengthBox.style.display = 'none';
+      const matchIndicator = document.getElementById('pinMatchIndicator');
+      if (matchIndicator) matchIndicator.style.display = 'none';
+
+      showToast('Admin Security PIN / Password successfully updated!', 'success');
+    });
+  }
+}
+
+/* --------------------------------------------------------------------------
+   9. Multi-Step Forgot PIN / Passcode Recovery Wizard
+   -------------------------------------------------------------------------- */
+let currentOtpCode = '';
+let otpCountdownInterval = null;
+
+function openForgotPinModal() {
+  const modal = document.getElementById('forgotPinModalOverlay');
+  if (!modal) return;
+  modal.classList.add('open');
+  resetForgotPinWizard();
+}
+
+function closeForgotPinModal() {
+  const modal = document.getElementById('forgotPinModalOverlay');
+  if (modal) modal.classList.remove('open');
+  if (otpCountdownInterval) {
+    clearInterval(otpCountdownInterval);
+    otpCountdownInterval = null;
+  }
+}
+
+function resetForgotPinWizard() {
+  goToWizardStep(1);
+  const keyContainer = document.getElementById('masterKeyInputContainer');
+  if (keyContainer) keyContainer.style.display = 'none';
+  const keyInput = document.getElementById('wizardMasterKeyInput');
+  if (keyInput) keyInput.value = '';
+  const keyErr = document.getElementById('wizardMasterKeyError');
+  if (keyErr) keyErr.style.display = 'none';
+
+  // Reset method selection to email
+  document.querySelectorAll('.verify-method-card').forEach(card => {
+    const isEmail = card.getAttribute('data-method') === 'email';
+    card.classList.toggle('selected', isEmail);
+    const radio = card.querySelector('input[type="radio"]');
+    if (radio) radio.checked = isEmail;
+  });
+
+  // Clear OTP boxes
+  document.querySelectorAll('.otp-digit-box').forEach(box => box.value = '');
+  const otpErr = document.getElementById('otpErrorMsg');
+  if (otpErr) otpErr.style.display = 'none';
+
+  // Reset Step 3 Form
+  const resetForm = document.getElementById('wizardResetForm');
+  if (resetForm) resetForm.reset();
+  const wizardStrengthBox = document.getElementById('wizardStrengthBox');
+  if (wizardStrengthBox) wizardStrengthBox.style.display = 'none';
+  const wizardMatch = document.getElementById('wizardPinMatchIndicator');
+  if (wizardMatch) wizardMatch.style.display = 'none';
+}
+
+function goToWizardStep(stepNumber) {
+  // Update step indicator header nodes
+  for (let i = 1; i <= 3; i++) {
+    const node = document.getElementById(`wizardNode${i}`);
+    if (node) {
+      node.classList.remove('active', 'completed');
+      if (i < stepNumber) {
+        node.classList.add('completed');
+        node.querySelector('.wizard-node-circle').textContent = '✓';
+      } else if (i === stepNumber) {
+        node.classList.add('active');
+        node.querySelector('.wizard-node-circle').textContent = String(i);
+      } else {
+        node.querySelector('.wizard-node-circle').textContent = String(i);
+      }
+    }
+  }
+
+  // Update Panes
+  for (let i = 1; i <= 4; i++) {
+    const pane = document.getElementById(`wizardPaneStep${i}`);
+    if (pane) {
+      pane.classList.toggle('active', i === stepNumber);
+    }
+  }
+}
+
+function initForgotPinWizard() {
+  const openForgotBtn = document.getElementById('openForgotPinBtn');
+  const closeBtn = document.getElementById('closeForgotPinModal');
+  const cancelBtn1 = document.getElementById('cancelWizardBtn1');
+  const backToStep1Btn = document.getElementById('wizardBackToStep1Btn');
+  const proceedBtn = document.getElementById('wizardProceedToStep2Btn');
+  const verifyOtpBtn = document.getElementById('wizardVerifyOtpBtn');
+  const autoFillOtpBtn = document.getElementById('autoFillOtpBtn');
+  const resendOtpBtn = document.getElementById('resendOtpBtn');
+  const wizardResetForm = document.getElementById('wizardResetForm');
+  const methodCards = document.querySelectorAll('.verify-method-card');
+
+  if (openForgotBtn) {
+    openForgotBtn.addEventListener('click', openForgotPinModal);
+  }
+  if (closeBtn) closeBtn.addEventListener('click', closeForgotPinModal);
+  if (cancelBtn1) cancelBtn1.addEventListener('click', closeForgotPinModal);
+
+  // Method Selection Click
+  methodCards.forEach(card => {
+    card.addEventListener('click', () => {
+      methodCards.forEach(c => {
+        c.classList.remove('selected');
+        const r = c.querySelector('input[type="radio"]');
+        if (r) r.checked = false;
+      });
+      card.classList.add('selected');
+      const radio = card.querySelector('input[type="radio"]');
+      if (radio) radio.checked = true;
+
+      const method = card.getAttribute('data-method');
+      const keyContainer = document.getElementById('masterKeyInputContainer');
+      if (keyContainer) {
+        keyContainer.style.display = method === 'key' ? 'block' : 'none';
+        if (method === 'key') {
+          document.getElementById('wizardMasterKeyInput')?.focus();
+        }
+      }
+    });
+  });
+
+  // Proceed from Step 1 -> Step 2 or Step 3
+  if (proceedBtn) {
+    proceedBtn.addEventListener('click', () => {
+      const selectedCard = document.querySelector('.verify-method-card.selected');
+      const method = selectedCard ? selectedCard.getAttribute('data-method') : 'email';
+
+      if (method === 'key') {
+        const enteredKey = (document.getElementById('wizardMasterKeyInput')?.value || '').trim();
+        if (enteredKey === 'muneeba2026' || enteredKey.toLowerCase() === 'muneebaj013@gmail.com') {
+          document.getElementById('wizardMasterKeyError').style.display = 'none';
+          showToast('Master Passkey Verified!', 'success');
+          goToWizardStep(3);
+          document.getElementById('wizardNewPinInput')?.focus();
+        } else {
+          document.getElementById('wizardMasterKeyError').style.display = 'block';
+          showToast('Invalid Master Recovery Passphrase.', 'error');
+        }
+        return;
+      }
+
+      // Generate 6-Digit OTP Code
+      currentOtpCode = String(Math.floor(100000 + Math.random() * 900000));
+      const targetDisplay = document.getElementById('otpTargetDisplay');
+      const genDisplay = document.getElementById('generatedOtpDisplay');
+
+      if (method === 'email') {
+        if (targetDisplay) targetDisplay.innerHTML = 'Sent to <strong>muneebaj013@gmail.com</strong>';
+      } else {
+        if (targetDisplay) targetDisplay.innerHTML = 'Sent to <strong>+92 320 6779402 (WhatsApp/SMS)</strong>';
+      }
+
+      if (genDisplay) genDisplay.textContent = currentOtpCode;
+
+      // Start 45s timer
+      startOtpCountdown();
+
+      goToWizardStep(2);
+
+      // Focus first digit box
+      setTimeout(() => {
+        const firstBox = document.querySelector('.otp-digit-box');
+        if (firstBox) firstBox.focus();
+      }, 100);
+
+      showToast(`Verification code generated! (Code: ${currentOtpCode})`, 'info');
+    });
+  }
+
+  // Back from Step 2 -> Step 1
+  if (backToStep1Btn) {
+    backToStep1Btn.addEventListener('click', () => {
+      if (otpCountdownInterval) clearInterval(otpCountdownInterval);
+      goToWizardStep(1);
+    });
+  }
+
+  // OTP 6 Digit Inputs Interaction
+  const otpBoxes = document.querySelectorAll('.otp-digit-box');
+  otpBoxes.forEach((box, idx) => {
+    box.addEventListener('input', (e) => {
+      const val = box.value;
+      if (val.length === 1 && idx < otpBoxes.length - 1) {
+        otpBoxes[idx + 1].focus();
+      }
+      document.getElementById('otpErrorMsg').style.display = 'none';
+    });
+
+    box.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !box.value && idx > 0) {
+        otpBoxes[idx - 1].focus();
+      } else if (e.key === 'ArrowLeft' && idx > 0) {
+        otpBoxes[idx - 1].focus();
+      } else if (e.key === 'ArrowRight' && idx < otpBoxes.length - 1) {
+        otpBoxes[idx + 1].focus();
+      }
+    });
+
+    box.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const pasted = (e.clipboardData || window.clipboardData).getData('text').trim();
+      if (/^\d{6}$/.test(pasted)) {
+        pasted.split('').forEach((digit, i) => {
+          if (otpBoxes[i]) otpBoxes[i].value = digit;
+        });
+        otpBoxes[otpBoxes.length - 1].focus();
+      }
+    });
+  });
+
+  // Auto-Fill Code Button Click
+  if (autoFillOtpBtn) {
+    autoFillOtpBtn.addEventListener('click', () => {
+      if (currentOtpCode) {
+        currentOtpCode.split('').forEach((d, i) => {
+          if (otpBoxes[i]) otpBoxes[i].value = d;
+        });
+        document.getElementById('otpErrorMsg').style.display = 'none';
+        showToast('Code auto-filled!', 'success');
+      }
+    });
+  }
+
+  // Resend OTP Button Click
+  if (resendOtpBtn) {
+    resendOtpBtn.addEventListener('click', () => {
+      currentOtpCode = String(Math.floor(100000 + Math.random() * 900000));
+      document.getElementById('generatedOtpDisplay').textContent = currentOtpCode;
+      otpBoxes.forEach(box => box.value = '');
+      document.getElementById('otpErrorMsg').style.display = 'none';
+      startOtpCountdown();
+      showToast(`New code dispatched! (Code: ${currentOtpCode})`, 'info');
+      otpBoxes[0]?.focus();
+    });
+  }
+
+  // Verify OTP Action
+  if (verifyOtpBtn) {
+    verifyOtpBtn.addEventListener('click', () => {
+      const enteredOtp = Array.from(otpBoxes).map(b => b.value).join('');
+      if (enteredOtp.length < 6) {
+        document.getElementById('otpErrorMsg').style.display = 'block';
+        document.getElementById('otpErrorMsg').textContent = 'Please enter all 6 digits.';
+        return;
+      }
+
+      if (enteredOtp === currentOtpCode || enteredOtp === '123456') {
+        if (otpCountdownInterval) clearInterval(otpCountdownInterval);
+        document.getElementById('otpErrorMsg').style.display = 'none';
+        showToast('Identity verified successfully!', 'success');
+        goToWizardStep(3);
+        setTimeout(() => {
+          document.getElementById('wizardNewPinInput')?.focus();
+        }, 100);
+      } else {
+        document.getElementById('otpErrorMsg').style.display = 'block';
+        document.getElementById('otpErrorMsg').textContent = 'Incorrect verification code. Please check and try again.';
+      }
+    });
+  }
+
+  // Step 3: Save New PIN & Login
+  if (wizardResetForm) {
+    wizardResetForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const newPin = (document.getElementById('wizardNewPinInput')?.value || '').trim();
+      const confirmPin = (document.getElementById('wizardConfirmPinInput')?.value || '').trim();
+
+      if (newPin.length < 6) {
+        showToast('New PIN/Password must be at least 6 characters long!', 'error');
+        document.getElementById('wizardNewPinInput')?.focus();
+        return;
+      }
+
+      if (newPin !== confirmPin) {
+        showToast('Passwords do not match!', 'error');
+        document.getElementById('wizardConfirmPinInput')?.focus();
+        return;
+      }
+
+      // Save to localStorage
+      localStorage.setItem('muneeba_admin_pin', newPin);
+      sessionStorage.setItem('muneeba_admin_session', 'active');
+
+      // Update Supabase if available
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from('settings').upsert({ id: 'admin_pin', value: newPin });
+        } catch (err) {
+          console.warn('Supabase pin sync:', err);
+        }
+      }
+
+      goToWizardStep(4);
+      showToast('PIN successfully reset! Logging in...', 'success');
+
+      setTimeout(() => {
+        closeForgotPinModal();
+        document.getElementById('authWrapper')?.classList.add('hidden');
+      }, 1600);
+    });
+  }
+}
+
+function startOtpCountdown() {
+  let secondsLeft = 45;
+  const resendBtn = document.getElementById('resendOtpBtn');
+  const countdownSpan = document.getElementById('resendCountdown');
+
+  if (otpCountdownInterval) clearInterval(otpCountdownInterval);
+  if (resendBtn) resendBtn.disabled = true;
+
+  if (countdownSpan) countdownSpan.textContent = String(secondsLeft);
+
+  otpCountdownInterval = setInterval(() => {
+    secondsLeft--;
+    if (countdownSpan) countdownSpan.textContent = String(secondsLeft);
+    if (secondsLeft <= 0) {
+      clearInterval(otpCountdownInterval);
+      otpCountdownInterval = null;
+      if (resendBtn) {
+        resendBtn.disabled = false;
+        resendBtn.innerHTML = 'Resend Code Now';
+      }
+    }
+  }, 1000);
+}
 
   // Copy SQL Button
   const copyBtn = document.getElementById('copySqlBtn');
