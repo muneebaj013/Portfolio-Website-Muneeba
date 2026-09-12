@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | Muneeba Jabbar</title>
+  <meta name="description" content="Secure Admin Dashboard for Muneeba Jabbar's Portfolio & Marketing Showcase.">
+  <meta name="robots" content="noindex, nofollow">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/admin.css">
+
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- ======================================================================
+       1. AUTH / LOCK SCREEN
+       ====================================================================== -->
+  <div class="auth-wrapper" id="authWrapper">
+    <div class="auth-card">
+      <div class="auth-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      </div>
+      <h1 class="auth-title">Admin Access Portal</h1>
+      <p class="auth-subtitle">Muneeba Jabbar &bull; Portfolio Management</p>
+
+      <form id="authForm" class="auth-form">
+        <div class="auth-input-group">
+          <label for="authPinInput" class="auth-label">Enter Security PIN / Password</label>
+          <input type="password" id="authPinInput" class="auth-input" placeholder="Enter PIN..." required autofocus autocomplete="current-password">
+        </div>
+        <button type="submit" class="auth-btn">
+          <span>Unlock Dashboard</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+        <p class="auth-error" id="authError">Incorrect PIN. Please try again.</p>
+      </form>
+
+      <div class="auth-hint">
+        Default security PIN: <code style="color:var(--accent-cyan);">admin123</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       2. ADMIN APPLICATION LAYOUT
+       ====================================================================== -->
+  <div class="admin-app">
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <div class="sidebar-header">
+        <a href="#" class="sidebar-brand">
+          <div class="brand-badge">M</div>
+          <div class="brand-text">
+            <h3>Muneeba Jabbar</h3>
+            <span>Admin Portal</span>
+          </div>
+        </a>
+        <button type="button" class="sidebar-close-btn" id="sidebarCloseBtn">&times;</button>
+      </div>
+
+      <!-- Cloud Status -->
+      <div class="sidebar-cloud-status">
+        <div class="cloud-status-badge">
+          <span class="cloud-dot" id="cloudStatusDot"></span>
+          <span id="cloudStatusText">Local Cache Mode</span>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="sidebar-nav">
+        <a class="nav-item active" data-tab="tabOverview">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span>Overview</span>
+        </a>
+
+        <a class="nav-item" data-tab="tabProjects">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+          <span>Projects</span>
+        </a>
+
+        <a class="nav-item" data-tab="tabTestimonials">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          <span>Testimonials</span>
+        </a>
+
+        <a class="nav-item" data-tab="tabInquiries">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+          <span>Messages &amp; Leads</span>
+          <span class="nav-badge" id="inquiriesBadge" style="display:none;">0</span>
+        </a>
+
+        <a class="nav-item" data-tab="tabSettings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <span>Supabase &amp; Config</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="index.html" target="_blank" class="btn-sidebar btn-sidebar-view">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+          <span>View Live Site</span>
+        </a>
+        <button type="button" class="btn-sidebar btn-sidebar-logout" id="sidebarLogoutBtn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          <span>Lock / Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="admin-main">
+      
+      <!-- Topbar -->
+      <header class="admin-topbar">
+        <div class="topbar-left">
+          <button type="button" class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Open sidebar menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+          <h2 class="page-title" id="currentPageTitle">Dashboard Overview</h2>
+        </div>
+
+        <div class="topbar-right">
+          <div class="admin-profile-badge">
+            <div class="admin-avatar">MJ</div>
+            <span class="admin-name">Muneeba</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Views -->
+      <div class="admin-content">
+
+        <!-- ==================================================================
+             TAB 1: OVERVIEW DASHBOARD
+             ================================================================== -->
+        <div class="tab-pane active" id="tabOverview">
+          
+          <div class="dashboard-stats-grid">
+            <div class="stat-card">
+              <div class="stat-info">
+                <div class="stat-label">Active Projects</div>
+                <div class="stat-value" id="statTotalProjects">6</div>
+              </div>
+              <div class="stat-icon blue">📁</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-info">
+                <div class="stat-label">Client Reviews</div>
+                <div class="stat-value" id="statTotalTestimonials">3</div>
+              </div>
+              <div class="stat-icon gold">⭐</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-info">
+                <div class="stat-label">Total Leads / Inquiries</div>
+                <div class="stat-value" id="statTotalInquiries">2</div>
+              </div>
+              <div class="stat-icon green">📬</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-info">
+                <div class="stat-label">Cloud Database Sync</div>
+                <div class="stat-value" style="font-size: 1.15rem; color:var(--accent-cyan);">Active</div>
+              </div>
+              <div class="stat-icon cyan">⚡</div>
+            </div>
+          </div>
+
+          <div class="quick-actions-bar">
+            <h3 class="section-title">Recent Inquiries &amp; Inbound Messages</h3>
+            <button type="button" class="btn-action-primary" onclick="openNewProjectModal()">
+              <span>+ Add New Project</span>
+            </button>
+          </div>
+
+          <div class="data-card">
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Sender</th>
+                    <th>Interested Service</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody id="recentInquiriesTableBody">
+                  <!-- Injected via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================================================================
+             TAB 2: PROJECTS MANAGEMENT
+             ================================================================== -->
+        <div class="tab-pane" id="tabProjects">
+          
+          <div class="quick-actions-bar">
+            <h3 class="section-title">Portfolio Projects Collection</h3>
+            <button type="button" class="btn-action-primary" id="addNewProjectBtn">
+              <span>+ Add New Project</span>
+            </button>
+          </div>
+
+          <div class="data-card">
+            <div class="data-card-header">
+              <div class="search-filter-box">
+                <input type="text" class="admin-search-input" id="projectSearchInput" placeholder="Search projects or clients...">
+                <select class="admin-filter-select" id="projectCategoryFilter">
+                  <option value="all">All Categories</option>
+                  <option value="video-editing">Video Editing</option>
+                  <option value="ai-animation">AI Animation</option>
+                  <option value="shopify">Shopify</option>
+                  <option value="meta-ads">Meta Ads</option>
+                  <option value="google-ads">Google Ads</option>
+                  <option value="seo">SEO</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Thumbnail</th>
+                    <th>Title &amp; Summary</th>
+                    <th>Category</th>
+                    <th>Client</th>
+                    <th>Key Metrics</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="projectsTableBody">
+                  <!-- Injected via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================================================================
+             TAB 3: TESTIMONIALS MANAGEMENT
+             ================================================================== -->
+        <div class="tab-pane" id="tabTestimonials">
+          
+          <div class="quick-actions-bar">
+            <h3 class="section-title">Client Reviews &amp; Testimonials</h3>
+            <button type="button" class="btn-action-primary" id="addNewTestimonialBtn">
+              <span>+ Add Testimonial</span>
+            </button>
+          </div>
+
+          <div class="data-card">
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Avatar</th>
+                    <th>Client Name</th>
+                    <th>Company / Role</th>
+                    <th>Rating</th>
+                    <th>Review Quote</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="testimonialsTableBody">
+                  <!-- Injected via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================================================================
+             TAB 4: INQUIRIES & LEADS INBOX
+             ================================================================== -->
+        <div class="tab-pane" id="tabInquiries">
+          
+          <div class="quick-actions-bar">
+            <h3 class="section-title">Client Contact Form Inquiries</h3>
+          </div>
+
+          <div class="data-card">
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Contact Details</th>
+                    <th>Service</th>
+                    <th>Message</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="inquiriesTableBody">
+                  <!-- Injected via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================================================================
+             TAB 5: SUPABASE & SITE SETTINGS
+             ================================================================== -->
+        <div class="tab-pane" id="tabSettings">
+          
+          <!-- Supabase Configuration -->
+          <div class="settings-section">
+            <div class="settings-header">
+              <div class="settings-icon">⚡</div>
+              <div>
+                <h3 class="settings-title">Supabase Cloud Database Connection</h3>
+                <p style="font-size: 0.82rem; color:var(--text-muted);">Connect your free Supabase project to sync all website data globally in real-time.</p>
+              </div>
+            </div>
+
+            <form id="supabaseConfigForm">
+              <div class="form-grid">
+                <div class="form-group full-width">
+                  <label class="form-label">Supabase Project URL</label>
+                  <input type="url" class="form-control" id="supabaseUrlInput" placeholder="https://xyzcompany.supabase.co">
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">Supabase Anon Public API Key</label>
+                  <input type="password" class="form-control" id="supabaseKeyInput" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+                </div>
+              </div>
+              <div style="margin-top: 1.25rem; display: flex; gap: 0.75rem;">
+                <button type="submit" class="btn-action-primary">Save &amp; Test Connection</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Supabase SQL Setup Helper -->
+          <div class="settings-section">
+            <div class="settings-header">
+              <div class="settings-icon">📄</div>
+              <div>
+                <h3 class="settings-title">Supabase SQL Schema (1-Click Setup)</h3>
+                <p style="font-size: 0.82rem; color:var(--text-muted);">Paste this SQL into your Supabase SQL Editor to automatically create tables with read/write access.</p>
+              </div>
+            </div>
+
+            <div class="sql-code-box">
+              <button type="button" class="copy-sql-btn" id="copySqlBtn">Copy SQL</button>
+              <pre id="supabaseSqlCode">-- 1. Create Projects Table
+create table if not exists projects (
+  id text primary key,
+  title text not null,
+  category text,
+  tag text,
+  image text,
+  client text,
+  timeline text,
+  metrics text,
+  description text,
+  deliverables jsonb,
+  created_at timestamp default now()
+);
+
+-- 2. Create Testimonials Table
+create table if not exists testimonials (
+  id text primary key,
+  name text not null,
+  role text,
+  initials text,
+  rating int default 5,
+  quote text,
+  created_at timestamp default now()
+);
+
+-- 3. Create Inquiries Table
+create table if not exists inquiries (
+  id text primary key,
+  name text not null,
+  email text,
+  phone text,
+  service text,
+  message text,
+  status text default 'new',
+  date text,
+  created_at timestamp default now()
+);
+
+-- Enable Public Read & Insert Access for Website Visitors
+alter table projects enable row level security;
+alter table testimonials enable row level security;
+alter table inquiries enable row level security;
+
+create policy "Public read projects" on projects for select using (true);
+create policy "Public modify projects" on projects for all using (true);
+
+create policy "Public read testimonials" on testimonials for select using (true);
+create policy "Public modify testimonials" on testimonials for all using (true);
+
+create policy "Public read inquiries" on inquiries for select using (true);
+create policy "Public modify inquiries" on inquiries for all using (true);</pre>
+            </div>
+          </div>
+
+          <!-- JSON Backup & Restore -->
+          <div class="settings-section">
+            <div class="settings-header">
+              <div class="settings-icon">💾</div>
+              <div>
+                <h3 class="settings-title">Backup &amp; Data Restore</h3>
+                <p style="font-size: 0.82rem; color:var(--text-muted);">Download a complete JSON snapshot of all your projects, testimonials, and leads.</p>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <button type="button" class="btn-secondary" id="exportBackupBtn">📥 Export JSON Backup</button>
+              <button type="button" class="btn-secondary" id="importBackupBtn">📤 Restore From Backup</button>
+              <input type="file" id="importBackupInput" accept=".json" style="display: none;">
+            </div>
+          </div>
+
+          <!-- Change PIN -->
+          <div class="settings-section">
+            <div class="settings-header">
+              <div class="settings-icon">🔑</div>
+              <div>
+                <h3 class="settings-title">Change Admin Security PIN</h3>
+                <p style="font-size: 0.82rem; color:var(--text-muted);">Update the security passcode required to access this admin portal.</p>
+              </div>
+            </div>
+
+            <form id="changePinForm" style="max-width: 380px;">
+              <div class="form-group">
+                <label class="form-label">New PIN / Password</label>
+                <input type="password" class="form-control" id="newPinInput" placeholder="Enter new PIN..." required minlength="4">
+              </div>
+              <div style="margin-top: 1rem;">
+                <button type="submit" class="btn-action-primary">Update PIN</button>
+              </div>
+            </form>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- ======================================================================
+       3. ADD / EDIT PROJECT MODAL
+       ====================================================================== -->
+  <div class="admin-modal-overlay" id="projectModalOverlay">
+    <div class="admin-modal-box">
+      <div class="modal-header-row">
+        <h3 class="modal-title" id="projectModalTitle">Add New Project</h3>
+        <button type="button" class="modal-close">&times;</button>
+      </div>
+
+      <form id="projectForm">
+        <input type="hidden" id="editProjectId">
+
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Project Title *</label>
+            <input type="text" class="form-control" id="projTitleInput" placeholder="e.g. Viral Hook Video Editing Reel" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Category *</label>
+            <select class="form-control" id="projCategoryInput" required>
+              <option value="video-editing">Video Editing</option>
+              <option value="ai-animation">AI Animation</option>
+              <option value="shopify">Shopify E-Commerce</option>
+              <option value="meta-ads">Meta Ads</option>
+              <option value="google-ads">Google Ads</option>
+              <option value="seo">SEO &amp; Growth</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Badge Tag</label>
+            <input type="text" class="form-control" id="projTagInput" placeholder="e.g. Premiere Pro • 4K 60FPS">
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Image Path / URL</label>
+            <input type="text" class="form-control" id="projImageInput" placeholder="assets/images/portfolio_video_editing.jpg or URL">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Client / Brand Name</label>
+            <input type="text" class="form-control" id="projClientInput" placeholder="e.g. Lumina Luxe Brand">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Timeline</label>
+            <input type="text" class="form-control" id="projTimelineInput" placeholder="e.g. 2 Weeks">
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Key Metrics / Results Highlight</label>
+            <input type="text" class="form-control" id="projMetricsInput" placeholder="e.g. +180% Engagement • 84.6% Retention">
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Project Description *</label>
+            <textarea class="form-control" id="projDescInput" placeholder="Detailed project overview..." required></textarea>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Deliverables (One item per line)</label>
+            <textarea class="form-control" id="projDeliverablesInput" placeholder="Pattern interrupt hooks&#10;Kinetic subtitles&#10;Color grading"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer-row">
+          <button type="button" class="btn-secondary btn-modal-cancel">Cancel</button>
+          <button type="submit" class="btn-action-primary">Save Project</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       4. ADD / EDIT TESTIMONIAL MODAL
+       ====================================================================== -->
+  <div class="admin-modal-overlay" id="testimonialModalOverlay">
+    <div class="admin-modal-box">
+      <div class="modal-header-row">
+        <h3 class="modal-title" id="testimonialModalTitle">Add Testimonial</h3>
+        <button type="button" class="modal-close">&times;</button>
+      </div>
+
+      <form id="testimonialForm">
+        <input type="hidden" id="editTestimonialId">
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Client Full Name *</label>
+            <input type="text" class="form-control" id="testNameInput" placeholder="e.g. Emily Miller" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Role &amp; Company *</label>
+            <input type="text" class="form-control" id="testRoleInput" placeholder="e.g. Founder, Lumina Luxe Brand" required>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Rating (Stars)</label>
+            <select class="form-control" id="testRatingInput">
+              <option value="5">5 Stars (★★★★★)</option>
+              <option value="4">4 Stars (★★★★☆)</option>
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Client Quote / Review *</label>
+            <textarea class="form-control" id="testQuoteInput" placeholder="What the client said about your work..." required></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer-row">
+          <button type="button" class="btn-secondary btn-modal-cancel">Cancel</button>
+          <button type="submit" class="btn-action-primary">Save Testimonial</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       5. TOAST NOTIFICATION CONTAINER
+       ====================================================================== -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="js/admin.js"></script>
+</body>
+</html>

@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initLegalModals();
   initScrollAnimations();
   initMatrixReferenceShowcase();
+  initDynamicContentSync();
 });
 
 /* --------------------------------------------------------------------------
@@ -922,6 +923,32 @@ function initContactForm() {
     })
     .then(response => response.json())
     .then(data => {
+      // Save Inquiry to Admin Storage & Supabase
+      try {
+        const newInquiry = {
+          id: 'inq-' + Date.now(),
+          name: nameInput.value.trim(),
+          email: emailInput.value.trim(),
+          phone: document.getElementById('clientPhone')?.value.trim() || '',
+          service: serviceSelect.value,
+          message: messageInput.value.trim(),
+          status: 'new',
+          date: new Date().toISOString().split('T')[0]
+        };
+        const existing = JSON.parse(localStorage.getItem('muneeba_inquiries') || '[]');
+        existing.unshift(newInquiry);
+        localStorage.setItem('muneeba_inquiries', JSON.stringify(existing));
+
+        const sUrl = localStorage.getItem('supabase_url');
+        const sKey = localStorage.getItem('supabase_key');
+        if (sUrl && sKey && window.supabase) {
+          const client = window.supabase.createClient(sUrl, sKey);
+          client.from('inquiries').insert(newInquiry).then(() => {}).catch(() => {});
+        }
+      } catch (e) {
+        console.warn('Inquiry record error:', e);
+      }
+
       form.reset();
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalText;
@@ -1528,4 +1555,64 @@ function initMatrixReferenceShowcase() {
       closeModal();
     }
   });
+}
+
+/* --------------------------------------------------------------------------
+   14. Dynamic Content Synchronization (Supabase + Local Storage)
+   -------------------------------------------------------------------------- */
+async function initDynamicContentSync() {
+  const savedTestimonials = localStorage.getItem('muneeba_testimonials');
+  const supabaseUrl = localStorage.getItem('supabase_url');
+  const supabaseKey = localStorage.getItem('supabase_key');
+
+  let testimonials = savedTestimonials ? JSON.parse(savedTestimonials) : null;
+
+  if (supabaseUrl && supabaseKey && window.supabase) {
+    try {
+      const client = window.supabase.createClient(supabaseUrl, supabaseKey);
+      const { data: tData } = await client.from('testimonials').select('*');
+      if (tData && tData.length) {
+        testimonials = tData;
+        localStorage.setItem('muneeba_testimonials', JSON.stringify(tData));
+      }
+    } catch (e) {
+      console.warn('Supabase public sync:', e);
+    }
+  }
+
+  // Update Testimonials Grid if dynamic testimonials exist
+  if (testimonials && testimonials.length) {
+    const testGrid = document.querySelector('.testimonials-grid');
+    if (testGrid) {
+      testGrid.innerHTML = testimonials.map(t => `
+        <div class="testimonial-card">
+          <div>
+            <div class="testimonial-rating" aria-label="${t.rating || 5} out of 5 stars">
+              ${'★'.repeat(t.rating || 5)}
+            </div>
+            <p class="testimonial-quote">
+              "${escapeHtmlText(t.quote)}"
+            </p>
+          </div>
+          <div class="testimonial-client">
+            <div class="testimonial-avatar">${escapeHtmlText(t.initials || 'CL')}</div>
+            <div>
+              <div class="testimonial-name">${escapeHtmlText(t.name)}</div>
+              <div class="testimonial-role">${escapeHtmlText(t.role)}</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+}
+
+function escapeHtmlText(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
